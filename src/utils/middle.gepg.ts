@@ -87,7 +87,7 @@ export async function sendBill(bill: Bill, billItemRepository: Repository<BillIt
 
   const gepgData = "<Gepg>"+gepgBillSubReqString+"<gepgSignature>"+signature+"</gepgSignature></Gepg>";
   console.log(gepgData);
-  const response = await postData("https://uat1.gepg.go.tz/api/bill/sigqrequest", gepgData);
+  const response = await postData("http://10.1.1.134:80/api/bill/sigqrequest", gepgData);
   console.log("\n"+ response);
   return true;
 }

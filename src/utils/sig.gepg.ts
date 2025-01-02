@@ -18,8 +18,6 @@ export class GePGGlobalSignature {
 
 
 
-    console.log("content to sign")
-    console.log(content)
 
 
     // Read the PFX file (binary data)

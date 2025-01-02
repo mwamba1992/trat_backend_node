@@ -24,6 +24,8 @@ export class AuthService {
     username: string,
     pass: string,
   ): Promise<{ access_token: string; refresh_token: string }> {
+
+    console.log("inside  login now")
     const user = await this.usersService.findOneByUsername(username);
 
     if (!user) {

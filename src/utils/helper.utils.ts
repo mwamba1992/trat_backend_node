@@ -20,7 +20,7 @@ const axios = require('axios');
 
 export async  function postData(url: string, data: string): Promise<String>{
   const response = await axios.post(url, data, {
-    headers: { 'Content-Type': 'application/xml' , 'Gepg-Com': "default.sp.in", 'Gepg-Code':'SP566' },
+    headers: { 'Content-Type': 'application/xml' , 'Gepg-Com': "default.sp.in", 'Gepg-Code':'SP535' },
 
   });
 
