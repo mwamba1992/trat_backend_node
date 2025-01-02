@@ -23,12 +23,18 @@ export class RoleController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: number, @Body() updateRoleDto: UpdateRoleDto) {
+  update(@Param('id') id: number, @Body() updateRoleDto: CreateRoleDto) {
     return this.roleService.update(+id, updateRoleDto);
   }
 
   @Put(':id')
   addPermissionsToRole(@Param('id') id: number, @Body() permissionIds: number[]) {
     return this.roleService.addPermissionsToRole(+id, permissionIds);
+  }
+
+
+  @Delete(':id')
+  remove(@Param('id') id: number) {
+    return this.roleService.remove(+id);
   }
 }

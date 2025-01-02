@@ -13,6 +13,7 @@ import { Party } from '../../../settings/parties/entities/party.entity';
 import { CommonSetup } from '../../../settings/common-setup/entities/common-setup.entity';
 import { Bill } from '../../../payment/bill/entities/bill.entity';
 import { BaseEntity } from '../../../utils/base.entity';
+import { Summons } from '../../appeals/entities/summons.entity';
 
 
 
@@ -75,5 +76,7 @@ export class ApplicationRegister extends BaseEntity{
   appeals: ApplicationRegister[];
 
 
+  @ManyToMany(() => Summons, (summons) => summons.appealList)
+  summonsList: Summons[];
 
 }

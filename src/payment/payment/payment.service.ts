@@ -39,16 +39,41 @@ export class PaymentService {
      payment.billAmount = parseFloat(pymtTrxInf.BillAmt[0]);
      payment.gepgReference = pymtTrxInf.PayRefId[0];
      payment.controlNumber = pymtTrxInf.PayCtrNum[0];
+     payment.payerPhone = pymtTrxInf.PyrCellNum[0];
 
-     // @ts-ignore
-    payment.bill = await this.billRepository.findOne({
+     // check if bill is available
+    const  bill =  await this.billRepository.findOne({
       where: {billId: pymtTrxInf.BillId[0]}
     });
 
+    if(bill === null){
+      console.log("bill id not found..............")
+      return  null;
+    }
+     // @ts-ignore
+    payment.bill = bill;
+
+    if(await this.paymentRepository.findOne({
+      where: { transactionId: pymtTrxInf.PspReceiptNumber[0], gepgReference: pymtTrxInf.PayRefId[0] }
+    }) !=null){
+      console.log("Duplicate Payment..............");
+      return null;
+    }
+
 
     await this.paymentRepository.save(payment);
-
     return  generatePaymentAck();
   }
 
+
+  async getAll(){
+    return this.paymentRepository.find(
+      {
+        relations: ['bill', 'bill.billItems'],
+        order: {
+          paymentDate: "ASC"
+        }
+      }
+    )
+  }
 }

@@ -25,9 +25,9 @@ export class CommonSetupService {
   }
 
   async findAll(setupType: string): Promise<CommonSetup[]> {
-    console.log(setupType);
-    return this.setupRepository.find({
-      where: { setupType } });
+    return this.setupRepository.find({ where: { setupType }, order: {
+        createdAt: "ASC"
+      }}, );
   }
 
   async findOne(id: number): Promise<CommonSetup> {
@@ -48,4 +48,6 @@ export class CommonSetupService {
     const setup = await this.findOne(id);
     await this.setupRepository.remove(setup);
   }
+
+  async
 }

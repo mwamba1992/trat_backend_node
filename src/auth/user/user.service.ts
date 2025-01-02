@@ -51,8 +51,16 @@ export class UserService {
     user.password =  await encodePassword("Trat@1234*");
     user.name = createUserDto.name;
     user.username = createUserDto.username;
-    user.address = createUserDto.address
+    user.address = ""
 
+    const roleList: Role[] = [];
+
+    for (const roleId of createUserDto.rolesList) {
+      const role = await this.roleRepository.findOne({where: {id: roleId}});
+      roleList.push(role);
+    }
+
+    user.rolesList = roleList;
     return this.userRepository.save(user);
     }catch (Error){
       console.log(Error);
@@ -62,7 +70,10 @@ export class UserService {
 
   async findAll(): Promise<User[]> {
     const users = await this.userRepository.find({
-      relations: ['rolesList'] });
+      relations: ['rolesList'] ,
+      order: {
+        createdAt: "DESC"
+      }});
     return users.map(user => user);
   }
 
@@ -101,10 +112,20 @@ export class UserService {
     }
     return user;
   }
-  async update(id: number, updateUserDto: UpdateUserDto) {
+  async update(id: number, updateUserDto: CreateUserDto) {
+    console.log("### inside update #######" + updateUserDto);
     const user = await this.findOne(id);
     // Update user fields
     Object.assign(user, updateUserDto);
+
+    const roleList: Role[] = [];
+
+    for (const roleId of updateUserDto.rolesList) {
+      const role = await this.roleRepository.findOne({where: {id: roleId}});
+      roleList.push(role);
+    }
+
+    user.rolesList = roleList;
 
     await this.userRepository.save(user);
     return user;
@@ -130,5 +151,14 @@ export class UserService {
     user.rolesList.push(role);
     await this.userRepository.save(user);
     return user;
+  }
+
+  async resetPassword(id: number) {
+    console.log("##### inside reset password ######")
+    const user = await this.findOne(id);
+    user.password = await encodePassword("Trat@1234*");
+    await this.userRepository.save(user);
+    return user;
+
   }
 }

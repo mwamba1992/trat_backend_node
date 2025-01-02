@@ -14,7 +14,9 @@ export class PermissionService {
 
   // Get all permissions
   async findAll(): Promise<Permission[]> {
-    return this.permissionRepository.find();
+    return this.permissionRepository.find({  order: {
+        createdAt: "DESC"
+      }});
   }
 
   // Get a single permission by ID

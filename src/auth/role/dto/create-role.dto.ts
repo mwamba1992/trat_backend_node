@@ -10,5 +10,5 @@ export class CreateRoleDto {
   desc: string
 
   @IsArray()
-  permissions: Permission[];
+  permissions: number[];
 }

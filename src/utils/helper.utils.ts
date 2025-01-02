@@ -66,3 +66,47 @@ export async function processParties(
 }
 
 
+// top-appellant.dto.ts
+export class TopAppellantDTO {
+  id: number;
+  name: string;
+  appealCount: number;
+}
+
+
+// Utility to generate date ranges for each month
+export function generateDateRanges(year: number) {
+  const dateRanges = [];
+  for (let i = 0; i < 12; i++) {
+    const startDate = new Date(year, i, 1);
+    const endDate = new Date(year, i + 1, 0);
+    dateRanges.push({ startDate, endDate });
+  }
+  return dateRanges;
+}
+
+// Helper to map month index to setter method name
+export function getMonthName(index: number) {
+  const monthNames = [
+    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+  ];
+  return monthNames[index];
+}
+
+
+// Method to format date from dd/MM/yyyy to yyyy-MM-dd
+export function formatDate(dateString: string): string {
+  // Split the input date (e.g. 15/05/2024) into day, month, year
+  const [day, month, year] = dateString.split('/').map(num => parseInt(num, 10));
+
+  // Create a new Date object using the parsed values (Note: months are 0-indexed in JavaScript)
+  const date = new Date(year, month - 1, day);
+
+  // Format the date as yyyy-MM-dd using toISOString and string manipulation
+
+  // Gets 'yyyy-MM-dd'
+  return date.toISOString().split('T')[0];
+}
+
+

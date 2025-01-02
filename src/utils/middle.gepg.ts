@@ -4,6 +4,7 @@ import { postData } from './helper.utils';
 import { BillItem } from '../payment/bill-item/entities/bill-item.entity';
 import { Repository } from 'typeorm';
 import { Constants } from './constants';
+import { Fee } from '../settings/fees/entities/fee.entity';
 
 
 const xml2js = require('xml2js');
@@ -32,64 +33,61 @@ export async function sendBill(bill: Bill, billItemRepository: Repository<BillIt
   const  formattedDateStringGeneratedDate = `${formattedDateGeneratedDate[0]}T${formattedDateGeneratedDate[1].split('.')[0]}`;
 
 
-  const  formattedExpiry = new Date(bill.generatedDate).toISOString().split('T');
+  const  formattedExpiry = new Date(bill.expiryDate).toISOString().split('T');
   const  formattedExpiryDate = `${formattedExpiry[0]}T${formattedExpiry[1].split('.')[0]}`;
 
 
 
   // Define the data object according to the XML structure
   const gepgBillSubReq = {
-        BillHdr: {
-          SpCode: Constants.SP_CODE,
-          RtrRespFlg: 'true',
+    gepgBillSubReq: {
+      BillHdr: {
+        SpCode: Constants.SP_CODE,
+        RtrRespFlg: 'true',
+      },
+      BillTrxInf: {
+        BillId: bill.billId,
+        SubSpCode: '1001',
+        SpSysId: Constants.SYSTEM_ID,
+        BillAmt: bill.billedAmount,
+        MiscAmt: '0',
+        BillExprDt: formattedExpiryDate,
+        PyrId: 'MBEYA CEMENT COMPANY LIMITED',
+        PyrName: bill.payerName,
+        BillDesc: bill.billDescription,
+        BillGenDt: formattedDateStringGeneratedDate,
+        BillGenBy: bill.payerName,
+        BillApprBy: 'TRAIS VERSION 2',
+        PyrCellNum: bill.payerPhone,
+        PyrEmail: Constants.REGISTER_EMAIL,
+        Ccy: "TZS",
+        BillEqvAmt: bill.billEquivalentAmount,
+        RemFlag: 'false',
+        BillPayOpt: Constants.FULL_BILL_PAY_TYPE,
+        BillItems: {
+          BillItem: billItemsArray,
         },
-        BillTrxInf: {
-          BillId: bill.billId,
-          SubSpCode: '1001',
-          SpSysId:  Constants.SYSTEM_ID,
-          BillAmt:  bill.billedAmount,
-          MiscAmt: '0',
-          BillExprDt: formattedExpiryDate,
-          PyrId: 'MBEYA CEMENT COMPANY LIMITED',
-          PyrName: bill.payerName,
-          BillDesc: bill.billDescription,
-          BillGenDt: formattedDateStringGeneratedDate,
-          BillGenBy:  bill.payerName,
-          BillApprBy: 'TRAIS VERSION 2',
-          PyrCellNum: bill.payerPhone,
-          PyrEmail:  Constants.REGISTER_EMAIL,
-          Ccy: "TZS",
-          BillEqvAmt: bill.billEquivalentAmount,
-          RemFlag: 'false',
-          BillPayOpt: Constants.FULL_BILL_PAY_TYPE,
-          BillItems: {
-            BillItem: billItemsArray,
-          },
-        },
+      },
+    }
   };
 
-  // Create a new XML builder
-  const builder = new xml2js.Builder({
-    renderOpts: { pretty: false, indent: '  ', newline: '\n' },
-  });
+  const builder = new xml2js.Builder(
+    {
+      renderOpts: { 'pretty': false, 'indent': ' ', 'newline': '\n' },
+      xmldec: { 'version': '1.0', 'encoding': 'UTF-8' }
+    }
+  );
 
   const content = builder.buildObject(gepgBillSubReq);
 
   const gePGGlobalSignature = new GePGGlobalSignature();
-  const signature = gePGGlobalSignature.createSignature(getStringWithinXmlTag(content, 'gepgBillSubReq'));
+   const gepgBillSubReqString  = getStringWithinXmlTag(content, 'gepgBillSubReq')
+  const signature = gePGGlobalSignature.createSignature(gepgBillSubReqString);
 
 
-  const gepgData = {
-    Gepg: {
-      gepgBillSubReq,
-      gepgSignature:  signature,
-    },
-  };
-
-
-  console.log(builder.buildObject(gepgData));
-
-  const response = await postData("https://uat1.gepg.go.tz/api/bill/sigqrequest", builder.buildObject(gepgData));
+  const gepgData = "<Gepg>"+gepgBillSubReqString+"<gepgSignature>"+signature+"</gepgSignature></Gepg>";
+  console.log(gepgData);
+  const response = await postData("https://uat1.gepg.go.tz/api/bill/sigqrequest", gepgData);
   console.log("\n"+ response);
   return true;
 }
@@ -117,6 +115,7 @@ export async  function generatePaymentAck(): Promise<string> {
 
 
 function getStringWithinXmlTag(xmlBody, xmlTag) {
+
   let xmlString = '';
 
   if (xmlBody && xmlTag) {
@@ -137,7 +136,7 @@ function getStringWithinXmlTag(xmlBody, xmlTag) {
       console.error("Error extracting string from XML tag:", e);
     }
   }
-
+  console.log(xmlString)
   return xmlString;
 }
 
@@ -146,16 +145,16 @@ function getStringWithinXmlTag(xmlBody, xmlTag) {
 
 // This version assumes you pass the repository as a parameter
 
-  export async function createBillItem(bill: Bill, no: string, billItemRepository: Repository<BillItem>): Promise<void> {
+  export async function createBillItem(bill: Bill, no: string, billItemRepository: Repository<BillItem>, fee: Fee, source: string): Promise<void> {
   const billItem = new BillItem();
-  billItem.billItemAmount = 10000;
-  billItem.billItemDescription = `Notice Bill For ${no}`;
+  billItem.billItemAmount = fee.amount;
+  billItem.billItemDescription = no;
   billItem.billItemRef = `REF${no}`;
   billItem.billItemMiscAmount = 0;
-  billItem.billItemEqvAmount = 10000;
-  billItem.sourceName = 'NOTICE';
+  billItem.billItemEqvAmount = fee.amount;
+  billItem.sourceName = source;
   billItem.bill = bill;
-  billItem.gfsCode = '7878887878';
+  billItem.gfsCode = fee.gfs.name;
 
   // Save the BillItem
   await billItemRepository.save(billItem);

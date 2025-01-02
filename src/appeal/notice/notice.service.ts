@@ -10,6 +10,7 @@ import { createBillItem, sendBill } from '../../utils/middle.gepg';
 import { User } from '../../auth/user/entities/user.entity';
 import { v4 as uuidv4 } from 'uuid';
 import { raw } from 'express';
+import { Fee } from '../../settings/fees/entities/fee.entity';
 
 @Injectable()
 export class NoticeService {
@@ -22,7 +23,9 @@ export class NoticeService {
     @InjectRepository(BillItem)
     private readonly billItemRepository: Repository<BillItem>,
     @InjectRepository(User)
-    private readonly userRepository: Repository<User>
+    private readonly userRepository: Repository<User>,
+    @InjectRepository(Fee)
+    private readonly feeRepository: Repository<Fee>,
   ) {}
 
 
@@ -91,8 +94,13 @@ export class NoticeService {
     // Step 1: Create the bill
     const bill = await this.createBill(noticeNo, createNoticeDto);
 
+
+    const fee = await this.feeRepository.findOne({
+      where: {revenueName: "NOTICE" },
+    });
+
     // Step 2: Create the bill item
-    await createBillItem(bill, noticeNo, this.billItemRepository);
+    await createBillItem(bill, 'fee for notice '+ noticeNo, this.billItemRepository, fee, "NOTICE");
 
     // Step 3: Send bill to GEPG and create notice if successful
     const isBillSent = await sendBill(bill, this.billItemRepository);
@@ -150,12 +158,24 @@ export class NoticeService {
 
   async findAll() {
     return await this.noticeRepository.find({
-      relations: ['bill'], // This tells TypeORM to also fetch the associated 'bill'
+      relations: ['bill'],
+      order: {
+        createdAt: "DESC"
+      }// This tells TypeORM to also fetch the associated 'bill'
     });
   }
 
   findOne(id: number) {
    return this.noticeRepository.findOne({where: {id}});
+  }
+
+  findByNoticeNo(noticeNo:string){
+    return this.noticeRepository.findOne({where: {noticeNo: noticeNo}});
+  }
+
+
+  save(notice: Notice) {
+    return this.noticeRepository.save(notice);
   }
 
   async update(id: number, createNoticeDto: CreateNoticeDto) {

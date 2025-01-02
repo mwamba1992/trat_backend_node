@@ -20,20 +20,27 @@ import { ApplicationRegister } from './appeal/application-register/entities/appl
 import { Appeal } from './appeal/appeals/entities/appeal.entity';
 import { AppealAmount } from './appeal/appeals/entities/appeal.amount';
 import { Fee } from './settings/fees/entities/fee.entity';
+import { BillModule } from './payment/bill/bill.module';
+import { Payment } from './payment/payment/entities/payment.entity';
+import { YearlyCases } from './appeal/appeals/entities/yearly.case';
+import { ScheduleModule } from '@nestjs/schedule';
+import { Summons } from './appeal/appeals/entities/summons.entity';
 
 @Module({
   imports: [
+    ScheduleModule.forRoot(),
     TypeOrmModule.forRoot({
       type: 'postgres',
-      host: 'localhost',
+      host: '102.223.8.195',
       port: 5432,
-      password: 'amtz',
-      username: 'amtz',
-      entities: [Permission, User, Role, Notice, Bill, BillItem, CommonSetup, Judge, Party, ApplicationRegister, Appeal, AppealAmount,  Fee],
-      database: 'ubs',
+      password: '123456',
+      username: 'trat',
+      entities: [Permission, User, Role, Notice, Bill, BillItem, CommonSetup, Judge, Party, ApplicationRegister, Appeal, AppealAmount,
+        Fee, Payment, YearlyCases, Summons],
+      database: 'trat_db',
       synchronize: true,
       logging: false,
-    }),AuthModule, AppealModule, PaymentModule, SettingsModule],
+    }),AuthModule, AppealModule, PaymentModule, SettingsModule, BillModule],
   controllers: [AppController],
   providers: [AppService],
 })

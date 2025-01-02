@@ -14,9 +14,16 @@ export class GePGGlobalSignature {
   password = 'paspass';
 
 
-  createSignature(content) {
+  createSignature(content: string) {
+
+
+
+    console.log("content to sign")
+    console.log(content)
+
+
     // Read the PFX file (binary data)
-    const pfxBuffer = fs.readFileSync('/Users/amtz/gepg/testing_keys/gepgclientprivatekey.pfx');
+    const pfxBuffer = fs.readFileSync('/Users/amtz/Downloads/gepgclientprivatekey.pfx');
 
     try {
       // Parse the PFX file (PKCS#12 format)
@@ -31,7 +38,7 @@ export class GePGGlobalSignature {
       }
 
       // Create a SHA256 hash of the content
-      const md = forge.md.sha256.create();
+      const md = forge.md.sha1.create();
       md.update(content);
 
       // Sign the hash using SHA256WithRSAEncryption

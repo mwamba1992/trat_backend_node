@@ -25,7 +25,7 @@ export class UserController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+  update(@Param('id') id: string, @Body() updateUserDto: CreateUserDto) {
     return this.userService.update(+id, updateUserDto);
   }
 
@@ -37,5 +37,10 @@ export class UserController {
   @Put('roles/:id/:userId')
   addRoleToUser(@Param('id') id: string, @Param('userId') userId: string) {
     return this.userService.addRoleToUser(+id, +userId);
+  }
+
+  @Put("/reset-password/:id")
+  resetPassword(@Param('id') id: string) {
+    return this.userService.resetPassword(+id);
   }
 }

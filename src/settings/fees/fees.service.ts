@@ -38,7 +38,10 @@ export class FeesService {
 
   // Find all Fees, optionally including relations like CommonSetup
   async findAll(): Promise<Fee[]> {
-    return this.feeRepository.find({ relations: ['gfs'] });  // Include the gfs relation
+    return this.feeRepository.find({ relations: ['gfs'] ,
+      order: {
+        createdAt: "ASC"
+      }});  // Include the gfs relation
   }
 
   // Find a Fee by ID

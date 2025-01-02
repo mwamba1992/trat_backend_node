@@ -13,8 +13,8 @@ import { User } from './user/entities/user.entity';
 export class AuthService {
 
   constructor(
-    private usersService: UserService,
-    private jwtService: JwtService,
+    private readonly  usersService: UserService,
+    private  readonly jwtService: JwtService,
     @InjectRepository(Role)
     private readonly roleRepository: Repository<Role>,
   ) {
@@ -64,6 +64,8 @@ export class AuthService {
     refreshToken: string,
     userId: number,
   ): Promise<{ access_token: string }> {
+
+    console.log(refreshToken, userId);
     try {
       await this.jwtService.verifyAsync(refreshToken, {
         secret: Constants.JWT_REFRESH_TOKEN,

@@ -9,9 +9,10 @@ import { Party } from '../../settings/parties/entities/party.entity';
 import { BillItem } from '../../payment/bill-item/entities/bill-item.entity';
 import { User } from '../../auth/user/entities/user.entity';
 import { Bill } from '../../payment/bill/entities/bill.entity';
+import { Fee } from '../../settings/fees/entities/fee.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([ApplicationRegister, Notice,  CommonSetup, Party, BillItem, User, Bill])],
+  imports: [TypeOrmModule.forFeature([ApplicationRegister, Notice,  CommonSetup, Party, BillItem, User, Bill, Fee])],
   controllers: [ApplicationRegisterController],
   providers: [ApplicationRegisterService],
 })

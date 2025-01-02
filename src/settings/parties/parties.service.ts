@@ -21,7 +21,10 @@ export class PartiesService {
 
   async findAll(): Promise<Party[]> {
     return this.businessRepository.find(
-      {relations: ['type']}
+      {relations: ['type'],
+        order: {
+          createdAt: "ASC"
+        }}
     );
   }
 
@@ -44,6 +47,20 @@ export class PartiesService {
     if (result.affected === 0) {
       throw new NotFoundException(`Business with ID ${id} not found.`);
     }
+  }
+
+  async save(business: Party): Promise<Party> {
+    return this.businessRepository.save(business);
+  }
+
+  getBusinessByName(name: string) {
+    // Normalize the name: trim spaces and convert to lowercase
+
+    return this.businessRepository.findOne({
+      where: {
+        name: name,  // Assuming name is a string column in your database
+      }
+    });
   }
 
   async getBusinessByType(type: string): Promise<Party[]> {

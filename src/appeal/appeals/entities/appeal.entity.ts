@@ -16,6 +16,7 @@ import { Bill } from '../../../payment/bill/entities/bill.entity';
 import { Party } from '../../../settings/parties/entities/party.entity';
 import { AppealAmount } from './appeal.amount';
 import { ProgressStatus } from '../dto/appeal.status.enum';
+import { Summons } from './summons.entity';
 
 @Entity()
 export class Appeal extends  BaseEntity{
@@ -110,7 +111,10 @@ export class Appeal extends  BaseEntity{
     enum: ProgressStatus,
     default: ProgressStatus.PENDING, // Default value
   })
-  progresStatus: ProgressStatus;
+  progressStatus: ProgressStatus;
+
+  @ManyToMany(() => Summons, (summons) => summons.appealList)
+  summonsList: Summons[];
 
 }
 

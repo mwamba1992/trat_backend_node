@@ -6,7 +6,7 @@ import {
   PrimaryGeneratedColumn,
   Column,
   OneToOne,
-  JoinColumn,
+  JoinColumn, ManyToOne,
 } from 'typeorm';
 import { Bill } from '../../../payment/bill/entities/bill.entity';
 
@@ -28,7 +28,7 @@ export class Notice extends BaseEntity{
   @Column({ type: 'varchar', length: 15, nullable: true })
   respondentPhone: string;
 
-  @OneToOne(() => Bill, { nullable: true })
+  @ManyToOne(() => Bill, { nullable: true })
   @JoinColumn({ name: 'billId', referencedColumnName: 'id' })
   bill: Bill;
 

@@ -1,5 +1,6 @@
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Bill } from '../../bill/entities/bill.entity';
+;
 
 
 @Entity()
@@ -27,7 +28,7 @@ export class Payment  {
   @Column()
   payerName: string;
 
-  @Column()
+  @Column({ type: 'varchar', length: 255, nullable: true })
   payerPhone: string;
 
   @Column()

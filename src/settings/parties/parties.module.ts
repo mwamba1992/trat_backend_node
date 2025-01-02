@@ -4,10 +4,17 @@ import { PartiesController } from './parties.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Party } from './entities/party.entity';
 import { CommonSetup } from '../common-setup/entities/common-setup.entity';
+import { CommonSetupService } from '../common-setup/common-setup.service';
+import { NoticeService } from '../../appeal/notice/notice.service';
+import { Notice } from '../../appeal/notice/entities/notice.entity';
+import { Bill } from '../../payment/bill/entities/bill.entity';
+import { BillItem } from '../../payment/bill-item/entities/bill-item.entity';
+import { User } from '../../auth/user/entities/user.entity';
+import { Fee } from '../fees/entities/fee.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Party, CommonSetup])],
+  imports: [TypeOrmModule.forFeature([Party, CommonSetup, Notice, Bill, BillItem, User, Fee])],
   controllers: [PartiesController],
-  providers: [PartiesService],
+  providers: [PartiesService, CommonSetupService, NoticeService],
 })
 export class PartiesModule {}

@@ -13,7 +13,9 @@ export class JudgesService {
   ) {}
 
   async findAll(): Promise<Judge[]> {
-    return await this.judgeRepository.find();
+    return await this.judgeRepository.find({  order: {
+        createdAt: "ASC"
+      }});
   }
 
   async findOne(id: number): Promise<Judge> {

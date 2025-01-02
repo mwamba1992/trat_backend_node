@@ -12,6 +12,7 @@ import { Constants } from '../../utils/constants';
 import { createBillItem, sendBill } from '../../utils/middle.gepg';
 import { BillItem } from '../../payment/bill-item/entities/bill-item.entity';
 import { processParties } from '../../utils/helper.utils';
+import { Fee } from '../../settings/fees/entities/fee.entity';
 
 @Injectable()
 export class ApplicationRegisterService {
@@ -28,6 +29,8 @@ export class ApplicationRegisterService {
     private readonly billRepository: Repository<Bill>,
     @InjectRepository(BillItem)
     private readonly billItemRepository: Repository<BillItem>,
+    @InjectRepository(Fee)
+    private readonly feeRepository: Repository<Fee>,
   ) {}
 
   async findAll(): Promise<ApplicationRegister[]> {
@@ -37,7 +40,10 @@ export class ApplicationRegisterService {
         'respondentList',
         'applications',
         'taxes'
-    ]});
+    ],
+      order: {
+        createdAt: "ASC"
+      }});
   }
 
   async findOne(id: number): Promise<ApplicationRegister> {
@@ -143,8 +149,12 @@ export class ApplicationRegisterService {
     // Step 1: Create the bill
     const bill = await this.createBill(createApplicationRegisterDto, applicants, respondents, applicationNo);
 
+    const fee = await this.feeRepository.findOne({
+      where: { revenueName: "APPLICATION" },
+    });
+
     // Step 2: Create the bill item
-    await createBillItem(bill, applicationNo, this.billItemRepository);
+    await createBillItem(bill, "fee for "+ applicationNo, this.billItemRepository, fee, "APPLICATION");
 
     // Step 3: Send bill to GEPG and create notice if successful
     const isBillSent = await sendBill(bill, this.billItemRepository);
