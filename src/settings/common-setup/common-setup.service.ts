@@ -23,6 +23,9 @@ export class CommonSetupService {
 
     createSetupDto.setupType = type
     const setup = this.setupRepository.create(createSetupDto);
+
+
+    console.log(this.userContextService.getUser())
     setup.createdBy = this.userContextService.getUser().userName
     return this.setupRepository.save(setup);
   }

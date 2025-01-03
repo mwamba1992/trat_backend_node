@@ -37,6 +37,7 @@ export  class AuthGuard implements CanActivate {
       // so that we can access it in our route handlers
       request['user'] = payload;
 
+      console.log(payload)
       // Here, we save the user info to the UserContextService
       const user = {
         userId: payload.sub,
