@@ -116,5 +116,9 @@ export class Appeal extends  BaseEntity{
   @ManyToMany(() => Summons, (summons) => summons.appealList)
   summonsList: Summons[];
 
+
+  @Column({type: 'text', nullable: true, array: true} )
+  trabAppeals: string[];
+
 }
 

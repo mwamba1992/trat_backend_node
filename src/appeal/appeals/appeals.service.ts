@@ -21,6 +21,7 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import { YearlyCases } from './entities/yearly.case';
 import { AppealFilterDto } from './dto/appeal.filter.dto';
 import { Fee } from '../../settings/fees/entities/fee.entity';
+import { UserContextService } from '../../auth/user/dto/user.context';
 
 ;
 @Injectable()
@@ -48,6 +49,7 @@ export class AppealsService {
     private readonly yearlyCasesRepository: Repository<YearlyCases>,
     @InjectRepository(Fee)
     private readonly feeRepository: Repository<Fee>,
+    private readonly userContextService: UserContextService
   ) {
   }
 
@@ -78,8 +80,10 @@ export class AppealsService {
     // Set initial appeal data
     appeal.statusTrend = statusTrend;
     appeal.taxes = tax;
-    appeal.createdBy = "Joel M Gaitan";
-    appeal.updatedBy = "Joel M Gaitan";
+
+
+    appeal.createdBy = this.userContextService.getUser().userName;
+    appeal.updatedBy = this.userContextService.getUser().username;
     appeal.dateOfFilling = createAppealDto.dateOfFilling;
     appeal.assNo = createAppealDto.assNo;
     appeal.natureOfRequest = createAppealDto.natureOfRequest;
@@ -91,6 +95,7 @@ export class AppealsService {
     const { applicants, respondents } = await processParties(createAppealDto, this.partyRepository);
     appeal.appellantList = applicants;
     appeal.respondentList = respondents;
+    appeal.trabAppeals = createAppealDto.applicationss
 
     // Create appeal amounts
     // Assign the created appeal amounts to the appeal

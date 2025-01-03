@@ -40,6 +40,12 @@ export class CreateAppealDto {
   @ValidateNested({ each: true })
   respondentList:  string[];
 
+
+  @IsArray()
+  @IsOptional()
+  @ValidateNested({ each: true })
+  applicationss:  string[];
+
   @IsString()
   @IsOptional()
   remarks?: string;
