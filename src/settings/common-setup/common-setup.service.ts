@@ -3,12 +3,14 @@ import { CreateCommonSetupDto } from './dto/create-common-setup.dto';
 import { CommonSetup } from './entities/common-setup.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
+import { UserContextService } from '../../auth/user/dto/user.context';
 
 @Injectable()
 export class CommonSetupService {
   constructor(
     @InjectRepository(CommonSetup)
     private readonly setupRepository: Repository<CommonSetup>,
+    private readonly userContextService: UserContextService
   ) {}
 
   async create(createSetupDto: CreateCommonSetupDto, type:string): Promise<CommonSetup> {
@@ -19,8 +21,9 @@ export class CommonSetupService {
         throw new NotFoundException(`Setup with name ${createSetupDto.name} already exists`);
     }
 
-    createSetupDto.setupType = type;
+    createSetupDto.setupType = type
     const setup = this.setupRepository.create(createSetupDto);
+    setup.createdBy = this.userContextService.getUser().userName
     return this.setupRepository.save(setup);
   }
 
