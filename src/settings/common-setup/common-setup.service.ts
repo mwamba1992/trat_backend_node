@@ -22,7 +22,7 @@ export class CommonSetupService {
     }
 
     createSetupDto.setupType = type
-    createSetupDto.createdBy  = this.userContextService.getUser().userName
+    createSetupDto.createdBy  = this.userContextService.getUser().username
     console.log("#### dto to create ####");
     console.log(createSetupDto);
     return await this.setupRepository.save(createSetupDto);

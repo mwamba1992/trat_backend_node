@@ -82,7 +82,7 @@ export class AppealsService {
     appeal.taxes = tax;
 
 
-    appeal.createdBy = this.userContextService.getUser().userName;
+    appeal.createdBy = this.userContextService.getUser().username;
     appeal.updatedBy = this.userContextService.getUser().username;
     appeal.dateOfFilling = createAppealDto.dateOfFilling;
     appeal.assNo = createAppealDto.assNo;
