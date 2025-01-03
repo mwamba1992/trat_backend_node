@@ -8,13 +8,14 @@ import { Repository } from 'typeorm';
 import { Permission } from './permission/entities/permission.entity';
 import { Constants } from '../utils/constants';
 import { User } from './user/entities/user.entity';
+import { RefreshTokenDto } from './user/dto/refresh.token.dto';
 
 @Injectable()
 export class AuthService {
 
   constructor(
-    private readonly  usersService: UserService,
-    private  readonly jwtService: JwtService,
+    private readonly usersService: UserService,
+    private readonly jwtService: JwtService,
     @InjectRepository(Role)
     private readonly roleRepository: Repository<Role>,
   ) {
@@ -25,7 +26,7 @@ export class AuthService {
     pass: string,
   ): Promise<{ access_token: string; refresh_token: string }> {
 
-    console.log("inside  login now")
+    console.log('inside  login now');
     const user = await this.usersService.findOneByUsername(username);
 
     if (!user) {
@@ -63,20 +64,19 @@ export class AuthService {
   }
 
   async refresh(
-    refreshToken: string,
-    userId: number,
+    refreshToken: RefreshTokenDto
   ): Promise<{ access_token: string }> {
 
-    console.log(refreshToken, userId);
+    console.log(refreshToken);
     try {
-      await this.jwtService.verifyAsync(refreshToken, {
+      await this.jwtService.verifyAsync(refreshToken.refreshToken, {
         secret: Constants.JWT_REFRESH_TOKEN,
       });
     } catch (error) {
       throw new UnauthorizedException('Invalid or expired refresh token');
     }
 
-    const user = await this.usersService.findOne(userId);
+    const user = await this.usersService.findOne(refreshToken.userId);
 
     if (!user) {
       throw new UnauthorizedException('User not found');
