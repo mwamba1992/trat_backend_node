@@ -12,4 +12,5 @@ export class CommonSetup extends BaseEntity{
 
   @Column()
   setupType: string;
+
 }

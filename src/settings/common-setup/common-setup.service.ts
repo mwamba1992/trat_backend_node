@@ -23,10 +23,9 @@ export class CommonSetupService {
 
     createSetupDto.setupType = type
     createSetupDto.createdBy  = this.userContextService.getUser().userName
-    const setup = this.setupRepository.create(createSetupDto);
-
-
-    return this.setupRepository.save(setup);
+    console.log("#### dto to create ####");
+    console.log(createSetupDto);
+    return await this.setupRepository.save(createSetupDto);
   }
 
   async findAll(setupType: string): Promise<CommonSetup[]> {
