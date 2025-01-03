@@ -8,10 +8,11 @@ import { BillItem } from '../../payment/bill-item/entities/bill-item.entity';
 import { User } from '../../auth/user/entities/user.entity';
 import { BillService } from '../../payment/bill/bill.service';
 import { Fee } from '../../settings/fees/entities/fee.entity';
+import { UserContextService } from '../../auth/user/dto/user.context';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Notice, Bill, BillItem, User, Fee])],
   controllers: [NoticeController],
-  providers: [NoticeService, BillService],
+  providers: [NoticeService, BillService, UserContextService],
 })
 export class NoticeModule {}
