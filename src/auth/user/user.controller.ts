@@ -20,26 +20,31 @@ export class UserController {
   }
 
   @Get(':id')
+  @UseGuards(AuthGuard)
   findOne(@Param('id') id: string) {
     return this.userService.findOne(+id);
   }
 
   @Patch(':id')
+  @UseGuards(AuthGuard)
   update(@Param('id') id: string, @Body() updateUserDto: CreateUserDto) {
     return this.userService.update(+id, updateUserDto);
   }
 
   @Delete(':id')
+  @UseGuards(AuthGuard)
   remove(@Param('id') id: string) {
     return this.userService.remove(+id);
   }
 
   @Put('roles/:id/:userId')
+  @UseGuards(AuthGuard)
   addRoleToUser(@Param('id') id: string, @Param('userId') userId: string) {
     return this.userService.addRoleToUser(+id, +userId);
   }
 
   @Put("/reset-password/:id")
+  @UseGuards(AuthGuard)
   resetPassword(@Param('id') id: string) {
     return this.userService.resetPassword(+id);
   }

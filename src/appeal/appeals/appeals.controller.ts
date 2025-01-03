@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards } from '@nestjs/common';
 import { AppealsService } from './appeals.service';
 import { CreateAppealDto } from './dto/create-appeal.dto';
 import { UpdateAppealDto } from './dto/update-appeal.dto';
@@ -10,6 +10,7 @@ import { NoticeService } from '../notice/notice.service';
 import { CommonSetupService } from '../../settings/common-setup/common-setup.service';
 import { PartiesService } from '../../settings/parties/parties.service';
 import { Party } from '../../settings/parties/entities/party.entity';
+import { AuthGuard } from '../../auth/auth.guard';
 
 @Controller('appeals')
 export class AppealsController {
@@ -20,16 +21,19 @@ export class AppealsController {
               private readonly partyService: PartiesService) {}
 
   @Post()
+  @UseGuards(AuthGuard)
   create(@Body() createAppealDto: CreateAppealDto) {
     return this.appealsService.create(createAppealDto);
   }
 
   @Get()
+  @UseGuards(AuthGuard)
   findAll() {
     return this.appealsService.findAll();
   }
 
   @Get('/appeal/:id')
+  @UseGuards(AuthGuard)
   findOne(@Param('id') id: string) {
     return this.appealsService.findOne(+id);
   }
@@ -40,27 +44,32 @@ export class AppealsController {
   }
 
   @Delete(':id')
+  @UseGuards(AuthGuard)
   remove(@Param('id') id: string) {
     return this.appealsService.remove(+id);
   }
 
   @Get("/top-appellant")
+  @UseGuards(AuthGuard)
   getTopAppellant(){
     return this.appealsService.getTopAppellants();
   }
 
 
   @Get("/card-details")
+  @UseGuards(AuthGuard)
   getCardDetails(){
     return this.appealsService.getCardsStatistics();
   }
 
   @Get("/yearly-cases")
+  @UseGuards(AuthGuard)
   getYearlyCases(){
     return this.appealsService.getCaseSummary();
   }
 
   @Get('/filter')
+  @UseGuards(AuthGuard)
   async filterAppeals(@Query() filters: AppealFilterDto) {
     return this.appealsService.filterAppeals(filters);
   }
