@@ -22,11 +22,10 @@ export class CommonSetupService {
     }
 
     createSetupDto.setupType = type
+    createSetupDto.createdBy  = this.userContextService.getUser().userName
     const setup = this.setupRepository.create(createSetupDto);
 
 
-    console.log(this.userContextService.getUser())
-    setup.createdBy = this.userContextService.getUser().userName
     return this.setupRepository.save(setup);
   }
 
@@ -55,5 +54,4 @@ export class CommonSetupService {
     await this.setupRepository.remove(setup);
   }
 
-  async
 }
