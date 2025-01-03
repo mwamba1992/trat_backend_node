@@ -21,7 +21,7 @@ export class GePGGlobalSignature {
 
 
     // Read the PFX file (binary data)
-    const pfxBuffer = fs.readFileSync('/Users/amtz/Downloads/gepgclientprivatekey.pfx');
+    const pfxBuffer = fs.readFileSync('/opt/tomcat/keys/trabPrivate.pfx');
 
     try {
       // Parse the PFX file (PKCS#12 format)

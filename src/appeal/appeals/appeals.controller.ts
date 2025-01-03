@@ -106,6 +106,11 @@ export class AppealsController {
           let party: Party;
           if(row.appellant_name === "COMMISSIONER GENERAL"){
             party = await this.partyService.findOne(3)
+          } else if(row.appellant_name === "NONOTICE"){
+            console.log(row.notice_number);
+            const notice = await  this.noticeService.findByNoticeNo(row.notice_number);
+            console.log(notice)
+            party = await this.partyService.getBusinessByName(notice.appellantFullName);
           }else {
             party = await this.partyService.getBusinessByName(row.appellant_name.trim().toUpperCase())
           }
