@@ -515,4 +515,8 @@ export class AppealsService {
   save(appeal: Appeal){
     return this.appealRepository.save(appeal);
   }
+
+  findByAppealNo(appealNo:string){
+    return this.appealRepository.findOne({where:{appealNo: appealNo}});
+  }
 }

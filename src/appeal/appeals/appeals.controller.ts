@@ -90,69 +90,97 @@ export class AppealsController {
           console.log(row.appeal_no);
           console.log(row.date_of_filling);
           console.log(row.decided_date);
+          //
 
-          const appeal = new Appeal();
+
           const parties = [];
-          const  appeals = [];
-          appeal.appealNo = row.appeal_no;
+          const appeal = await this.appealsService.findByAppealNo(row.appeal_no);
 
+          if(appeal != null) {
+            if (row.respondent_name === "COMMISSIONER GENERAL") {
+              const party = await this.partyService.findOne(3);
+              parties.push(party)
+              appeal.respondentList = parties;
+              await this.appealsService.save(appeal);
+            }else{
 
-          appeal.dateOfFilling = new Date(formatDate(row.date_of_filling));
-
-          if(row.decided_date !="null"){
-            appeal.dateOfDecision = new Date(formatDate(row.decided_date));
+              if(row.respondent_name === "NONOTICE"){
+                console.log(row.notice_number)
+                const notice = await  this.noticeService.findByNoticeNo(row.notice_number);
+                const party = await this.partyService.getBusinessByName(notice.respondentFullName);
+                parties.push(party)
+                appeal.respondentList = parties;
+                await this.appealsService.save(appeal);
+              }else {
+                const party = await this.partyService.getBusinessByName(row.respondent_name.trim().toUpperCase());
+                parties.push(party)
+                appeal.respondentList = parties;
+                await this.appealsService.save(appeal);
+              }
+            }
           }
-
-          appeal.financialYear = row.financial_year;
-          appeal.natureOfRequest = row.nature_of_appeal
-          appeal.assNo = row.ass_no
-          appeal.billNo = row.bill_no
-          appeal.remarks = row.remarks
-          appeal.taxedOff = row.taxed_off
-
-
-          console.log(row.appellant_name.trim().toUpperCase())
-          let party: Party;
-          if(row.appellant_name === "COMMISSIONER GENERAL"){
-            party = await this.partyService.findOne(3)
-          } else if(row.appellant_name === "NONOTICE"){
-            console.log(row.notice_number);
-            const notice = await  this.noticeService.findByNoticeNo(row.notice_number);
-            console.log(notice)
-            party = await this.partyService.getBusinessByName(notice.appellantFullName);
-          }else {
-            party = await this.partyService.getBusinessByName(row.appellant_name.trim().toUpperCase())
-          }
-
-          console.log(party)
-          parties.push(party)
-          appeal.appellantList = parties
-
-
-          if(!row.bill.empty){
-            appeal.billId = await this.billService.findByBillId(row.bill);
-          }
-
-          if(row.notice_number !="NOTICENO"){
-            appeal.notice = await  this.noticeService.findByNoticeNo(row.notice_number)
-          }else{
-            appeal.notice = null;
-          }
-
-
-          if(!Number.isInteger(row.status_trend)){
-            appeal.statusTrend = await this.commonSetupService.findOne(20)
-          }else {
-            appeal.statusTrend = await this.commonSetupService.findOne(row.tax_id)
-          }
-          appeal.taxes =  await this.commonSetupService.findOne( row.tax_id)
-
-
-          console.log("saved" + appeal.appealNo)
-          appeals.push(await this.appealsService.save(appeal) );
-          // party.appellantList =  appeals
-          // await this.partyService.save(party)
-          // console.log("party saved" + party.name)
+          // const appeal = new Appeal();
+          // const parties = [];
+          // const  appeals = [];
+          // appeal.appealNo = row.appeal_no;
+          //
+          //
+          // appeal.dateOfFilling = new Date(formatDate(row.date_of_filling));
+          //
+          // if(row.decided_date !="null"){
+          //   appeal.dateOfDecision = new Date(formatDate(row.decided_date));
+          // }
+          //
+          // appeal.financialYear = row.financial_year;
+          // appeal.natureOfRequest = row.nature_of_appeal
+          // appeal.assNo = row.ass_no
+          // appeal.billNo = row.bill_no
+          // appeal.remarks = row.remarks
+          // appeal.taxedOff = row.taxed_off
+          //
+          //
+          // console.log(row.appellant_name.trim().toUpperCase())
+          // let party: Party;
+          // if(row.appellant_name === "COMMISSIONER GENERAL"){
+          //   party = await this.partyService.findOne(3)
+          // } else if(row.appellant_name === "NONOTICE"){
+          //   console.log(row.notice_number);
+          //   const notice = await  this.noticeService.findByNoticeNo(row.notice_number);
+          //   console.log(notice)
+          //   party = await this.partyService.getBusinessByName(notice.appellantFullName);
+          // }else {
+          //   party = await this.partyService.getBusinessByName(row.appellant_name.trim().toUpperCase())
+          // }
+          //
+          // console.log(party)
+          // parties.push(party)
+          // appeal.appellantList = parties
+          //
+          //
+          // if(!row.bill.empty){
+          //   appeal.billId = await this.billService.findByBillId(row.bill);
+          // }
+          //
+          // if(row.notice_number !="NOTICENO"){
+          //   appeal.notice = await  this.noticeService.findByNoticeNo(row.notice_number)
+          // }else{
+          //   appeal.notice = null;
+          // }
+          //
+          //
+          // if(!Number.isInteger(row.status_trend)){
+          //   appeal.statusTrend = await this.commonSetupService.findOne(20)
+          // }else {
+          //   appeal.statusTrend = await this.commonSetupService.findOne(row.tax_id)
+          // }
+          // appeal.taxes =  await this.commonSetupService.findOne( row.tax_id)
+          //
+          //
+          // console.log("saved" + appeal.appealNo)
+          // appeals.push(await this.appealsService.save(appeal) );
+          // // party.appellantList =  appeals
+          // // await this.partyService.save(party)
+          // // console.log("party saved" + party.name)
 
 
         }

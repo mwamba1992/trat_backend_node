@@ -1,5 +1,7 @@
-import { Controller, Post, Body, Get } from '@nestjs/common';
+import { Controller, Post, Body, Get, UseGuards, Query } from '@nestjs/common';
 import { PaymentService } from './payment.service';
+import { AuthGuard } from '../../auth/auth.guard';
+import { PaymentSearchDto } from './dto/payment.search.dto';
 
 
 @Controller('payment')
@@ -9,6 +11,12 @@ export class PaymentController {
   @Post("/receive-payment")
   create(@Body() receivePayment: string) {
     return this.paymentService.receivePayment(receivePayment);
+  }
+
+  @Get('/filter')
+  @UseGuards(AuthGuard)
+  async filterPayments(@Query() filters: PaymentSearchDto) {
+    return this.paymentService.searchPayments(filters);
   }
 
   @Get()

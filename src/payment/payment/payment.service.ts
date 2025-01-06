@@ -5,6 +5,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Bill } from '../bill/entities/bill.entity';
 import { Repository } from 'typeorm'
 import { generatePaymentAck } from '../../utils/middle.gepg';
+import { PaymentSearchDto } from './dto/payment.search.dto';
+import * as assert from 'node:assert';
 
 
 @Injectable()
@@ -75,5 +77,24 @@ export class PaymentService {
         }
       }
     )
+  }
+
+
+  async searchPayments(search: PaymentSearchDto){
+    console.log(search);
+    const queryBuilder = this.paymentRepository.createQueryBuilder('payment');
+
+
+    // Filter by date range for filing
+    if (search.dateOfFillingFrom) {
+      queryBuilder.andWhere('appeal.payment >= :dateOfFillingFrom', { dateOfFillingFrom: search.dateOfFillingFrom });
+    }
+    if (search.dateOfFillingTo) {
+      queryBuilder.andWhere('appeal.payment <= :dateOfFillingTo', { dateOfFillingTo: search.dateOfFillingTo });
+    }
+
+    console.log(queryBuilder.getQuery());
+    // Execute the query and return filtered results
+    return await queryBuilder.getMany();
   }
 }

@@ -10,6 +10,7 @@ import { User } from '../../auth/user/entities/user.entity';
 import { BillItem } from '../bill-item/entities/bill-item.entity';
 import { Fee } from '../../settings/fees/entities/fee.entity';
 import { sendBill } from '../../utils/middle.gepg';
+import { UserContextService } from '../../auth/user/dto/user.context';
 
 
 @Injectable()
@@ -25,6 +26,7 @@ export class BillService {
     private readonly  billItemRepository: Repository<BillItem>,
     @InjectRepository(Fee)
     private readonly  feeRepository: Repository<Fee>,
+    private readonly userContextService: UserContextService
   ) {}
 
 
@@ -65,14 +67,13 @@ export class BillService {
     bill.createdAt = new Date();
     bill.updatedAt = new Date();
 
-    bill.createdByUser = await this.userRepository.findOne({
-      where: { id: 1 },
-    });
+    bill.createdByUser = this.userContextService.getUser().username;
 
     bill.approvedBy = 'SYSTEM';
     bill.financialYear = '2024/2025';
 
     const saveBill =   await this.billRepository.save(bill);
+
 
 
     for (const cart of createBillDto.carts) {
@@ -131,6 +132,7 @@ export class BillService {
      const trxStsCode = parsedData?.Gepg?.gepgBillSubResp?.[0]?.BillTrxInf?.[0]?.TrxStsCode?.[0];
      const signature = parsedData?.Gepg?.gepgSignature?.[0];
 
+     console.log({ billId, controlNumber, trxSts, trxStsCode, signature });
 
      // saving  bill update
      const  bill = await this.billRepository.findOne({where: {billId: billId}});
@@ -139,7 +141,7 @@ export class BillService {
 
      await this.billRepository.save(bill);
 
-     console.log({ billId, controlNumber, trxSts, trxStsCode, signature });
+
 
   }
 
