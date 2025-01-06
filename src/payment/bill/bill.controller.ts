@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
 import { BillService } from './bill.service';
 import { UpdateBillDto } from './dto/update-bill.dto';
 import { BillCreateDTO } from './dto/create-bill.dto';
@@ -6,6 +6,7 @@ import csvParser from 'csv-parser';
 import * as fs from 'fs';
 import { Bill } from './entities/bill.entity';
 import { formatDate } from '../../utils/helper.utils';
+import { AuthGuard } from '../../auth/auth.guard';
 
 @Controller('bills')
 export class BillController {
@@ -13,6 +14,7 @@ export class BillController {
     private readonly billService: BillService) {}
 
   @Post()
+  @UseGuards(AuthGuard)
   create(@Body() createBillDto: BillCreateDTO) {
     console.log(createBillDto);
     return this.billService.create(createBillDto);
