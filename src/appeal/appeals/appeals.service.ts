@@ -199,11 +199,12 @@ export class AppealsService {
 
 
   private async handleBillCreation(createAppealDto: CreateAppealDto, applicants: Party[], respondents: Party[], applicationNo: string) {
-    // Step 1: Create the bill
-    const bill = await this.createBill(createAppealDto, applicants, respondents, applicationNo);
-
 
     const fee = await this.feeRepository.findOne({ where: { type: "APPEAL" } , relations: ['gfs']});
+
+    // Step 1: Create the bill
+    const bill = await this.createBill(createAppealDto, respondents,applicants, applicationNo, fee);
+
 
     // Step 2: Create the bill item
     await createBillItem(bill, "fee for appeal" + applicationNo, this.billItemRepository,fee, "APPEAL");
@@ -217,9 +218,9 @@ export class AppealsService {
 
 
   async createBill(createAppealDto: CreateAppealDto,
-                   respondents: Party[], applicants: Party[], appealNo: string) {
+                   respondents: Party[], applicants: Party[], appealNo: string, fee:Fee) {
     const bill = new Bill();
-    bill.billedAmount = 10000;
+    bill.billedAmount = fee.amount;
     bill.status = 'PENDING';
     bill.generatedDate = new Date();
     bill.appType = 'APPEAL';
@@ -227,7 +228,7 @@ export class AppealsService {
     bill.billReference = appealNo;
     bill.billControlNumber = '0';
     bill.billPayed = false;
-    bill.billEquivalentAmount = 10000;
+    bill.billEquivalentAmount = fee.amount;
     bill.miscellaneousAmount = 0;
     bill.payerPhone = applicants[0].phone_number;
     bill.payerName = applicants.map(applicant => applicant.name).join(' ');
