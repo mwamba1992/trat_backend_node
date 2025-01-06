@@ -1,6 +1,7 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
 import { ApplicationRegisterService } from './application-register.service';
 import { CreateApplicationRegisterDto } from './dto/create-application-register.dto';
+import { AuthGuard } from '../../auth/auth.guard';
 
 
 
@@ -9,6 +10,7 @@ export class ApplicationRegisterController {
   constructor(private readonly applicationRegisterService: ApplicationRegisterService) {}
 
   @Post()
+  @UseGuards(AuthGuard)
   create(@Body() createApplicationRegisterDto: CreateApplicationRegisterDto) {
     return this.applicationRegisterService.create(createApplicationRegisterDto);
   }
