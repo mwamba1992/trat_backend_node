@@ -67,7 +67,8 @@ export class BillService {
     bill.createdAt = new Date();
     bill.updatedAt = new Date();
 
-    bill.createdByUser = this.userContextService.getUser().username;
+
+    bill.createdByUser = await this.userRepository.findOne({ where: { username: this.userContextService.getUser().username } });
 
     bill.approvedBy = 'SYSTEM';
     bill.financialYear = '2024/2025';
