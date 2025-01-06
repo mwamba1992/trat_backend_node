@@ -13,7 +13,7 @@ export class PaymentController {
     return this.paymentService.receivePayment(receivePayment);
   }
 
-  @Get('/filter')
+  @Post('/filter')
   @UseGuards(AuthGuard)
   async filterPayments(@Query() filters: PaymentSearchDto) {
     return this.paymentService.searchPayments(filters);
