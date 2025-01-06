@@ -10,10 +10,11 @@ import { BillItem } from '../../payment/bill-item/entities/bill-item.entity';
 import { User } from '../../auth/user/entities/user.entity';
 import { Bill } from '../../payment/bill/entities/bill.entity';
 import { Fee } from '../../settings/fees/entities/fee.entity';
+import { UserContextService } from '../../auth/user/dto/user.context';
 
 @Module({
   imports: [TypeOrmModule.forFeature([ApplicationRegister, Notice,  CommonSetup, Party, BillItem, User, Bill, Fee])],
   controllers: [ApplicationRegisterController],
-  providers: [ApplicationRegisterService],
+  providers: [ApplicationRegisterService, UserContextService],
 })
 export class ApplicationRegisterModule {}

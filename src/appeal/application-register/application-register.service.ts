@@ -13,6 +13,7 @@ import { createBillItem, sendBill } from '../../utils/middle.gepg';
 import { BillItem } from '../../payment/bill-item/entities/bill-item.entity';
 import { processParties } from '../../utils/helper.utils';
 import { Fee } from '../../settings/fees/entities/fee.entity';
+import { UserContextService } from '../../auth/user/dto/user.context';
 
 @Injectable()
 export class ApplicationRegisterService {
@@ -31,6 +32,7 @@ export class ApplicationRegisterService {
     private readonly billItemRepository: Repository<BillItem>,
     @InjectRepository(Fee)
     private readonly feeRepository: Repository<Fee>,
+    private readonly userContextService: UserContextService,
   ) {}
 
   async findAll(): Promise<ApplicationRegister[]> {
@@ -97,7 +99,7 @@ export class ApplicationRegisterService {
     application.taxes = tax;
     application.natureOfRequest = createApplicationRegisterDto.natureOfRequest;
     application.dateOfFilling = new Date(createApplicationRegisterDto.dateOfFilling);
-    application.createdBy = "Joel M Gaitan";
+    application.createdBy = this.userContextService.getUser().username;
     application.statusTrend = statusTrend;
 
     // Generate application number based on the latest application and region
@@ -147,11 +149,14 @@ export class ApplicationRegisterService {
 // Helper function to handle bill creation
   private async handleBillCreation(createApplicationRegisterDto: CreateApplicationRegisterDto, applicants: Party[], respondents: Party[], applicationNo: string) {
     // Step 1: Create the bill
-    const bill = await this.createBill(createApplicationRegisterDto, applicants, respondents, applicationNo);
 
     const fee = await this.feeRepository.findOne({
-      where: { revenueName: "APPLICATION" },
+      where: { type: "APPLICATION" },
     });
+
+
+    const bill = await this.createBill(createApplicationRegisterDto, applicants, respondents, applicationNo, fee);
+
 
     // Step 2: Create the bill item
     await createBillItem(bill, "fee for "+ applicationNo, this.billItemRepository, fee, "APPLICATION");
@@ -204,9 +209,9 @@ export class ApplicationRegisterService {
 
 
   async createBill(createApplicationRegisterDto: CreateApplicationRegisterDto,
-                   respondents: Party[], applicants: Party[], applicationNo: string) {
+                   respondents: Party[], applicants: Party[], applicationNo: string,fee: Fee) {
     const bill = new Bill();
-    bill.billedAmount = 10000;
+    bill.billedAmount = fee.amount;
     bill.status = 'PENDING';
     bill.generatedDate = new Date();
     bill.appType = 'APPLICATION';
@@ -214,7 +219,7 @@ export class ApplicationRegisterService {
     bill.billReference = applicationNo;
     bill.billControlNumber = '0';
     bill.billPayed = false;
-    bill.billEquivalentAmount = 10000;
+    bill.billEquivalentAmount = fee.amount;
     bill.miscellaneousAmount = 0;
     bill.payerPhone = applicants[0].phone_number;
     bill.payerName = applicants.map(applicant => applicant.name).join(' ');
