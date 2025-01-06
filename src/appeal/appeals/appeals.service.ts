@@ -137,7 +137,7 @@ export class AppealsService {
     return this.appealRepository.find({
       relations: ['notice', 'taxes', 'statusTrend', 'billId', 'appellantList', 'respondentList', 'appealAmount'],
       order: {
-        createdAt: "ASC"
+        dateOfFilling: "DESC"
       }
     });
   }
