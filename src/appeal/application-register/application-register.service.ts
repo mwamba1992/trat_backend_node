@@ -152,6 +152,7 @@ export class ApplicationRegisterService {
 
     const fee = await this.feeRepository.findOne({
       where: { type: "APPLICATION" },
+      relations: ['gfs'],
     });
 
 
