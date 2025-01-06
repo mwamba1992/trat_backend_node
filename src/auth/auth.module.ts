@@ -13,6 +13,7 @@ import { RoleService } from './role/role.service';
 import { Role } from './role/entities/role.entity';
 import { PermissionService } from './permission/permission.service';
 import { Permission } from './permission/entities/permission.entity';
+import { UserContextService } from './user/dto/user.context';
 
 @Module({
   imports: [
@@ -28,6 +29,6 @@ import { Permission } from './permission/entities/permission.entity';
       signOptions: { expiresIn: '7d' },  // Refresh token expiration (7 days)
   }), UserModule, PermissionModule, RoleModule, User],
   controllers: [AuthController],
-  providers: [AuthService, UserService]
+  providers: [AuthService, UserService, UserContextService]
 })
 export class AuthModule {}
