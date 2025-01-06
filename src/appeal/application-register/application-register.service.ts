@@ -156,7 +156,7 @@ export class ApplicationRegisterService {
     });
 
 
-    const bill = await this.createBill(createApplicationRegisterDto, applicants, respondents, applicationNo, fee);
+    const bill = await this.createBill(createApplicationRegisterDto, respondents, applicants, applicationNo, fee);
 
 
     // Step 2: Create the bill item
