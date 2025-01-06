@@ -203,7 +203,7 @@ export class AppealsService {
     const bill = await this.createBill(createAppealDto, applicants, respondents, applicationNo);
 
 
-    const fee = await this.feeRepository.findOne({ where: {  revenueName: "APPEAL" } });
+    const fee = await this.feeRepository.findOne({ where: { type: "APPEAL" } , relations: ['gfs']});
 
     // Step 2: Create the bill item
     await createBillItem(bill, "fee for appeal" + applicationNo, this.billItemRepository,fee, "APPEAL");
