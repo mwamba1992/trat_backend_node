@@ -76,7 +76,7 @@ export class PaymentService {
       {
         relations: ['bill', 'bill.billItems'],
         order: {
-          paymentDate: "ASC"
+          paymentDate: "DESC"
         }
       }
     )
