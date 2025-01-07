@@ -52,6 +52,9 @@ export class PaymentService {
       console.log("bill id not found..............")
       return  null;
     }
+
+    bill.billPayed = true;
+    await this.billRepository.save(bill)
      // @ts-ignore
     payment.bill = bill;
 
@@ -85,12 +88,19 @@ export class PaymentService {
     const queryBuilder = this.paymentRepository.createQueryBuilder('payment');
 
 
+    queryBuilder
+      .leftJoinAndSelect('payment.bill', 'bill')
+
     // Filter by date range for filing
     if (search.dateOfFillingFrom) {
       queryBuilder.andWhere('appeal.payment >= :dateOfFillingFrom', { dateOfFillingFrom: search.dateOfFillingFrom });
     }
     if (search.dateOfFillingTo) {
       queryBuilder.andWhere('appeal.payment <= :dateOfFillingTo', { dateOfFillingTo: search.dateOfFillingTo });
+    }
+
+    if(search.type){
+      queryBuilder.andWhere('bill.appType <= :type', { type: search.type });
     }
 
     console.log(queryBuilder.getQuery());

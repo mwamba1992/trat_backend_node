@@ -191,7 +191,6 @@ export class NoticeService {
     notice.listAppeal = createNoticeDto.listAppeal;
     notice.listApplication = createNoticeDto.listApplication;
     notice.appealAgaints = createNoticeDto.appealAgaints;
-    notice.financialYear = createNoticeDto.financialYear;
     notice.noticeType = createNoticeDto.noticeType;
    return this.noticeRepository.save(notice);
   }

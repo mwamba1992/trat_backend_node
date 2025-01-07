@@ -36,10 +36,6 @@ export class CreateNoticeDto {
   @IsString({ each: true })
   listApplication?: string[];
 
-  @IsOptional()
-  @IsString()
-  @Length(1, 10)
-  financialYear?: string;
 
   @IsOptional()
   @IsString()

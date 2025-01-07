@@ -11,4 +11,7 @@ export class PaymentSearchDto {
   @IsOptional()
   @IsDateString()
   dateOfFillingTo?: string;
+
+  @IsOptional()
+  type?: string
 }
