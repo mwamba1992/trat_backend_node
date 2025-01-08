@@ -27,13 +27,13 @@ export class Appeal extends  BaseEntity{
   @CreateDateColumn({ type: 'date' })
   dateOfFilling: Date;
 
-  @CreateDateColumn({ type: 'date' })
+  @CreateDateColumn({ type: 'date' , nullable: true})
   dateOfDecision: Date;
 
-  @CreateDateColumn({ type: 'date' })
+  @CreateDateColumn({ type: 'date' , nullable: true})
   concludingDate: Date;
 
-  @CreateDateColumn({ type: 'date' })
+  @CreateDateColumn({ type: 'date' , nullable: true})
   dateOfLastOrder: Date;
 
 

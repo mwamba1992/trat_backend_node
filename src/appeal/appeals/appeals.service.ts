@@ -90,6 +90,9 @@ export class AppealsService {
     appeal.bankNo = createAppealDto.bankNo;
     appeal.notice = notice;
     appeal.remarks = createAppealDto.remarks;
+    appeal.dateOfDecision = null
+    appeal.dateOfLastOrder = null
+    appeal.concludingDate = null
 
     // Process appellants and respondents using an external function
     const { applicants, respondents } = await processParties(createAppealDto, this.partyRepository);
