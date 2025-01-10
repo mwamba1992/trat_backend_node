@@ -91,14 +91,12 @@ export class NoticeService {
 
 // Helper function to create bill and notice
   private async createBillAndNotice(createNoticeDto: CreateNoticeDto, noticeNo: string): Promise<Notice> {
-    // Step 1: Create the bill
-    const bill = await this.createBill(noticeNo, createNoticeDto);
-
-
     const fee = await this.feeRepository.findOne({
-      where: {revenueName: "NOTICE" },
+      where: {type: "NOTICE" },
     });
-
+    // Step 1: Create the bill
+    const bill = await this.createBill(noticeNo, createNoticeDto, fee);
+    
     // Step 2: Create the bill item
     await createBillItem(bill, 'fee for notice '+ noticeNo, this.billItemRepository, fee, "NOTICE");
 
@@ -114,9 +112,9 @@ export class NoticeService {
   }
 
 // Helper function to create a bill
-  private async createBill(noticeNo: string, createNoticeDto: CreateNoticeDto): Promise<Bill> {
+  private async createBill(noticeNo: string, createNoticeDto: CreateNoticeDto, fee:Fee): Promise<Bill> {
     const bill = new Bill();
-    bill.billedAmount = 10000;
+    bill.billedAmount = fee.amount;
     bill.status = 'PENDING';
     bill.generatedDate = new Date();
     bill.appType = 'NOTICE';
@@ -124,7 +122,7 @@ export class NoticeService {
     bill.billReference = noticeNo;
     bill.billControlNumber = '0';
     bill.billPayed = false;
-    bill.billEquivalentAmount = 10000;
+    bill.billEquivalentAmount = fee.amount;
     bill.miscellaneousAmount = 0;
     bill.payerPhone =  createNoticeDto.appellantPhone
     bill.payerName = createNoticeDto.appellantFullName

@@ -227,7 +227,7 @@ export class AppealsService {
     bill.status = 'PENDING';
     bill.generatedDate = new Date();
     bill.appType = 'APPEAL';
-    bill.billDescription = `Appeal Bill For Appeal No ${appealNo}`;
+    bill.billDescription = `Bill For Appeal No ${appealNo}`;
     bill.billReference = appealNo;
     bill.billControlNumber = '0';
     bill.billPayed = false;
