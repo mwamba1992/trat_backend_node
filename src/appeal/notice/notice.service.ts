@@ -93,10 +93,11 @@ export class NoticeService {
   private async createBillAndNotice(createNoticeDto: CreateNoticeDto, noticeNo: string): Promise<Notice> {
     const fee = await this.feeRepository.findOne({
       where: {type: "NOTICE" },
+      relations: ['gfs'],
     });
     // Step 1: Create the bill
     const bill = await this.createBill(noticeNo, createNoticeDto, fee);
-    
+
     // Step 2: Create the bill item
     await createBillItem(bill, 'fee for notice '+ noticeNo, this.billItemRepository, fee, "NOTICE");
 
