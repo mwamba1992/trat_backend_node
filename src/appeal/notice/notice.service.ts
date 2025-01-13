@@ -239,7 +239,7 @@ export class NoticeService {
       bill.status = 'PENDING';
       bill.generatedDate = new Date();
       bill.appType = 'NOTICEHIGH';
-      bill.billDescription = `Bill For Notice of Appeals High Court For `;
+      bill.billDescription = `Bill For Notice of Appeals High Court For`;
       bill.billReference = noticeHigh.id+  noticeHigh.appellantName;
       bill.billControlNumber = '0';
       bill.billPayed = false;
@@ -249,8 +249,7 @@ export class NoticeService {
       bill.payerName = noticeHigh.appellantName
       bill.payerEmail = "trat@register.go.tz";
       bill.billPayType = "1";
-
-
+      
       const uuid = uuidv4(); // Full UUID
       bill.billId =    uuid.split('-')[0];
 
