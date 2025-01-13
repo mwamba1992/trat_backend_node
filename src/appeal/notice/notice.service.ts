@@ -217,7 +217,7 @@ export class NoticeService {
     noticeHigh.listOfAppeals = [];
     for (const appealNo of notice.listOfAppeals) {
       const appeal = await this.appealRepository.findOne({
-        where: { appealNo: appealNo }
+        where: {  id: Number(appealNo) }
       });
 
       noticeHigh.listOfAppeals.push(appeal);
@@ -239,7 +239,7 @@ export class NoticeService {
       bill.status = 'PENDING';
       bill.generatedDate = new Date();
       bill.appType = 'NOTICEHIGH';
-      bill.billDescription = `Bill For Notice of Appeals High Court For ` + noticeHigh.listOfAppeals.map(appeal => appeal.appealNo).join(', ');
+      bill.billDescription = `Bill For Notice of Appeals High Court For `;
       bill.billReference = noticeHigh.id+  noticeHigh.appellantName;
       bill.billControlNumber = '0';
       bill.billPayed = false;
