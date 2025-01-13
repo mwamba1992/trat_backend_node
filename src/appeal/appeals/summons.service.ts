@@ -44,6 +44,15 @@ export class SummonsService {
     summons.judge = await this.judgeRepository.findOne({
       where: { id: createSummonsDto.judge }
     });
+
+    summons.member1 = await this.judgeRepository.findOne({
+      where: { id: createSummonsDto.member1 }
+    });
+
+    summons.member2 = await this.judgeRepository.findOne({
+      where: { id: createSummonsDto.member2 }
+    });
+
     summons.appealList = createSummonsDto.appeals;
     return summons;
   }

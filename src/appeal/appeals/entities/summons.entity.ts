@@ -40,6 +40,13 @@ export class Summons {
   @ManyToOne(() => Judge, (judge) => judge.id)
   judge: Judge;
 
+  @ManyToOne(() => Judge, (judge) => judge.id)
+  member1: Judge;
+
+
+  @ManyToOne(() => Judge, (judge) => judge.id)
+  member2: Judge;
+
   @ManyToMany(() => Appeal, (appeal) => appeal.summonsList)
   @JoinTable()
   appealList: Appeal[];

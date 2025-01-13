@@ -31,4 +31,8 @@ export class CreateSummonsDto {
 
   judge: number;
 
+  member1: number;
+
+  member2: number;
+
 }
