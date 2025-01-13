@@ -11,10 +11,11 @@ import { Fee } from '../../settings/fees/entities/fee.entity';
 import { UserContextService } from '../../auth/user/dto/user.context';
 import { NoticeHighCourt } from './entities/notice.high.court';
 import { Appeal } from '../appeals/entities/appeal.entity';
+import { NoticeHighController } from './notice.high.controller';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Notice, Bill, BillItem, User, Fee, NoticeHighCourt, Appeal])],
-  controllers: [NoticeController],
+  controllers: [NoticeController, NoticeHighController],
   providers: [NoticeService, BillService, UserContextService],
 })
 export class NoticeModule {}

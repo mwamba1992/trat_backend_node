@@ -273,8 +273,16 @@ export class NoticeService {
       return await this.billRepository.save(bill);
     }
 
+  }
 
 
+  async findAllNoticeHigh(){
+    return await this.noticeHighCourtRepository.find({
+      relations: ['bill'],
+      order: {
+        createdAt: "DESC"
+      }//
+    });
   }
 }
 

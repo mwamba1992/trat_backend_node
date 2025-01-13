@@ -13,13 +13,6 @@ export class NoticeController {
               private readonly billService: BillService,) {
   }
 
-
-  @Post("/high")
-  @UseGuards(AuthGuard)
-  createHigh(@Body() createNoticeDto: CreateNoticeHigh) {
-    return this.noticeService.saveHighCourtNotice(createNoticeDto);
-  }
-
   @Post()
   @UseGuards(AuthGuard)
   create(@Body() createNoticeDto: CreateNoticeDto) {
