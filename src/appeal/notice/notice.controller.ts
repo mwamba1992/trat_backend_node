@@ -5,11 +5,19 @@ import { Notice } from './entities/notice.entity';
 import { formatDate } from '../../utils/helper.utils';
 import { BillService } from '../../payment/bill/bill.service';
 import { AuthGuard } from '../../auth/auth.guard';
+import { CreateNoticeHigh } from './dto/create-notice-high';
 
 @Controller('notices')
 export class NoticeController {
   constructor(private readonly noticeService: NoticeService,
               private readonly billService: BillService,) {
+  }
+
+
+  @Post("/high")
+  @UseGuards(AuthGuard)
+  createHigh(@Body() createNoticeDto: CreateNoticeHigh) {
+    return this.noticeService.saveHighCourtNotice(createNoticeDto);
   }
 
   @Post()
