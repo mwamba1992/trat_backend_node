@@ -21,10 +21,11 @@ import { BillService } from '../../payment/bill/bill.service';
 import { Fee } from '../../settings/fees/entities/fee.entity';
 import { PartiesService } from '../../settings/parties/parties.service';
 import { UserContextService } from '../../auth/user/dto/user.context';
+import { NoticeHighCourt } from '../notice/entities/notice.high.court';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Appeal,
-    CommonSetup, Notice, Party, Bill, BillItem, User, ApplicationRegister, YearlyCases, Summons, Judge, CommonSetup, Fee])],
+    CommonSetup, Notice, Party, Bill, BillItem, User, ApplicationRegister, YearlyCases, Summons, Judge, CommonSetup, Fee, NoticeHighCourt])],
   controllers: [AppealsController, SummonsController],
   providers: [AppealsService, SummonsService, CommonSetupService, NoticeService, BillService, PartiesService, UserContextService],
 })

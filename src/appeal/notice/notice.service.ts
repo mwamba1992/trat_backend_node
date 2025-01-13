@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { CreateNoticeDto } from './dto/create-notice.dto';
-import { UpdateNoticeDto } from './dto/update-notice.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Notice } from './entities/notice.entity';
@@ -11,6 +10,9 @@ import { User } from '../../auth/user/entities/user.entity';
 import { v4 as uuidv4 } from 'uuid';
 import { raw } from 'express';
 import { Fee } from '../../settings/fees/entities/fee.entity';
+import { CreateNoticeHigh } from './dto/create-notice-high';
+import { NoticeHighCourt } from './entities/notice.high.court';
+import { Appeal } from '../appeals/entities/appeal.entity';
 
 @Injectable()
 export class NoticeService {
@@ -26,6 +28,10 @@ export class NoticeService {
     private readonly userRepository: Repository<User>,
     @InjectRepository(Fee)
     private readonly feeRepository: Repository<Fee>,
+    @InjectRepository(NoticeHighCourt)
+    private readonly noticeHighCourtRepository: Repository<NoticeHighCourt>,
+    @InjectRepository(Appeal)
+    private readonly appealRepository: Repository<Appeal>,
   ) {}
 
 
@@ -199,6 +205,76 @@ export class NoticeService {
       throw new Error('Permission not found');
     }
     await this.noticeRepository.remove(notice);
+  }
+
+  async saveHighCourtNotice(notice: CreateNoticeHigh) {
+    const noticeHigh = new NoticeHighCourt();
+    noticeHigh.appellantName = notice.appellantName;
+    noticeHigh.appellantType = notice.appellantType;
+    noticeHigh.respondentName = notice.respondentName;
+    noticeHigh.listOfAppeals = [];
+    for (const appealNo of notice.listOfAppeals) {
+      const appeal = await this.appealRepository.findOne({
+        where: { appealNo: appealNo }
+      });
+
+      noticeHigh.listOfAppeals.push(appeal);
+    }
+
+
+    const savedNotice =  await this.noticeHighCourtRepository.save(noticeHigh);
+
+
+    if (notice.appellantType === "2") {
+
+      const fee = await this.feeRepository.findOne({
+        where: {type: "NOTICEHIGH" },
+        relations: ['gfs'],
+      });
+
+      const bill = new Bill();
+      bill.billedAmount = fee.amount;
+      bill.status = 'PENDING';
+      bill.generatedDate = new Date();
+      bill.appType = 'NOTICEHIGH';
+      bill.billDescription = `Bill For Notice of Appeals High Court For ` + noticeHigh.listOfAppeals.map(appeal => appeal.appealNo).join(', ');
+      bill.billReference = noticeHigh.id+  noticeHigh.appellantName;
+      bill.billControlNumber = '0';
+      bill.billPayed = false;
+      bill.billEquivalentAmount = fee.amount;
+      bill.miscellaneousAmount = 0;
+      bill.payerPhone =   noticeHigh.appellantPhone
+      bill.payerName = noticeHigh.appellantName
+      bill.payerEmail = "trat@register.go.tz";
+      bill.billPayType = "1";
+
+
+      const uuid = uuidv4(); // Full UUID
+      bill.billId =    uuid.split('-')[0];
+
+
+
+      // Set expiry date (14 days from today)
+      const expiryDate = new Date();
+      expiryDate.setDate(expiryDate.getDate() + 14);
+      bill.expiryDate = expiryDate;
+
+      // Set audit fields
+      bill.createdAt = new Date();
+      bill.updatedAt = new Date();
+
+      bill.createdByUser = await this.userRepository.findOne({
+        where: { id: 1 },
+      });
+
+      bill.approvedBy = 'SYSTEM';
+      bill.financialYear = '2024/2025';
+
+      return await this.billRepository.save(bill);
+    }
+
+
+
   }
 }
 

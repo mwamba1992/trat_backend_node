@@ -12,9 +12,11 @@ import { BillItem } from '../../payment/bill-item/entities/bill-item.entity';
 import { User } from '../../auth/user/entities/user.entity';
 import { Fee } from '../fees/entities/fee.entity';
 import { UserContextService } from '../../auth/user/dto/user.context';
+import { NoticeHighCourt } from '../../appeal/notice/entities/notice.high.court';
+import { Appeal } from '../../appeal/appeals/entities/appeal.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Party, CommonSetup, Notice, Bill, BillItem, User, Fee])],
+  imports: [TypeOrmModule.forFeature([Party, CommonSetup, Notice, Bill, BillItem, User, Fee, NoticeHighCourt, Appeal])],
   controllers: [PartiesController],
   providers: [PartiesService, CommonSetupService, NoticeService, UserContextService],
 })

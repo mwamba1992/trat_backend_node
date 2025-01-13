@@ -17,6 +17,8 @@ import { Party } from '../../../settings/parties/entities/party.entity';
 import { AppealAmount } from './appeal.amount';
 import { ProgressStatus } from '../dto/appeal.status.enum';
 import { Summons } from './summons.entity';
+import { ApplicationRegister } from '../../application-register/entities/application-register.entity';
+import { NoticeHighCourt } from '../../notice/entities/notice.high.court';
 
 @Entity()
 export class Appeal extends  BaseEntity{
@@ -119,6 +121,11 @@ export class Appeal extends  BaseEntity{
 
   @Column({type: 'text', nullable: true, array: true} )
   trabAppeals: string[];
+
+
+  @ManyToMany(() => NoticeHighCourt, (notice) => notice.listOfAppeals)
+  noticesHigh: NoticeHighCourt[];
+
 
 }
 

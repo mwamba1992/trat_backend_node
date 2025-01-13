@@ -25,6 +25,7 @@ import { Payment } from './payment/payment/entities/payment.entity';
 import { YearlyCases } from './appeal/appeals/entities/yearly.case';
 import { ScheduleModule } from '@nestjs/schedule';
 import { Summons } from './appeal/appeals/entities/summons.entity';
+import { NoticeHighCourt } from './appeal/notice/entities/notice.high.court';
 
 @Module({
   imports: [
@@ -36,7 +37,7 @@ import { Summons } from './appeal/appeals/entities/summons.entity';
       password: '123456',
       username: 'trat',
       entities: [Permission, User, Role, Notice, Bill, BillItem, CommonSetup, Judge, Party, ApplicationRegister, Appeal, AppealAmount,
-        Fee, Payment, YearlyCases, Summons],
+        Fee, Payment, YearlyCases, Summons, NoticeHighCourt],
       database: 'trat_db',
       synchronize: true,
       logging: false,
