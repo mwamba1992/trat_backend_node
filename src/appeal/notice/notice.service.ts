@@ -249,7 +249,7 @@ export class NoticeService {
       bill.payerName = noticeHigh.appellantName
       bill.payerEmail = "trat@register.go.tz";
       bill.billPayType = "1";
-      
+
       const uuid = uuidv4(); // Full UUID
       bill.billId =    uuid.split('-')[0];
 
@@ -271,7 +271,19 @@ export class NoticeService {
       bill.approvedBy = 'SYSTEM';
       bill.financialYear = '2024/2025';
 
-      return await this.billRepository.save(bill);
+
+      const savedBill = await this.billRepository.save(bill);
+
+
+      await createBillItem(bill, 'fee for notice to highcourt ', this.billItemRepository, fee, "NOTICEHIGH");
+
+      // Step 3: Send bill to GEPG and create notice if successful
+      const isBillSent = await sendBill(savedBill, this.billItemRepository);
+      if (!isBillSent) {
+        throw new Error('Failed to send bill to GEPG');
+      }
+
+      return noticeHigh;
     }
 
   }
