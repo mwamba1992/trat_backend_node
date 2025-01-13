@@ -208,10 +208,12 @@ export class NoticeService {
   }
 
   async saveHighCourtNotice(notice: CreateNoticeHigh) {
+    console.log(notice)
     const noticeHigh = new NoticeHighCourt();
     noticeHigh.appellantName = notice.appellantName;
     noticeHigh.appellantType = notice.appellantType;
     noticeHigh.respondentName = notice.respondentName;
+    noticeHigh.appellantPhone = notice.appellantPhone;
     noticeHigh.listOfAppeals = [];
     for (const appealNo of notice.listOfAppeals) {
       const appeal = await this.appealRepository.findOne({
