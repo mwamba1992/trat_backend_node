@@ -8,10 +8,10 @@ export  class AppealAmount{
   @PrimaryGeneratedColumn()// Using UUID for the 'id'
   id: number;
 
-  @Column()
-  amount:number
+  @Column({ type: 'float', nullable: true })
+  amount: number;
 
-  @Column()
+  @Column({ type: 'float', nullable: true })
   amountAllowed:number
 
   @ManyToOne(() => CommonSetup, (currency) => currency.id, { nullable: false })
