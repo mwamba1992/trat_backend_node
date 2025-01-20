@@ -44,7 +44,7 @@ export class ApplicationRegisterService {
         'taxes'
     ],
       order: {
-        createdAt: "ASC"
+        createdAt: "DESC"
       }});
   }
 
