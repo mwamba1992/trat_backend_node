@@ -56,7 +56,7 @@ export async function sendBill(bill: Bill, billItemRepository: Repository<BillIt
         PyrName: bill.payerName,
         BillDesc: bill.billDescription,
         BillGenDt: formattedDateStringGeneratedDate,
-        BillGenBy: bill.payerName,
+        BillGenBy: bill.payerName.substring(0, 53),
         BillApprBy: 'TRAIS VERSION 2',
         PyrCellNum: bill.payerPhone,
         PyrEmail: Constants.REGISTER_EMAIL,

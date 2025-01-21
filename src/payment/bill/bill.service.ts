@@ -160,4 +160,10 @@ export class BillService {
   findByBillId(billId:string){
     return this.billRepository.findOne({where: {billId: billId}});
   }
+
+
+  async resendBill(billId: string) {
+    await sendBill(await this.findByBillId(billId), this.billItemRepository);
+  }
+
 }
