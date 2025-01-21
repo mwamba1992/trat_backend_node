@@ -38,7 +38,7 @@ export async function sendBill(bill: Bill, billItemRepository: Repository<BillIt
 
 
 
-  let generatedBy = bill.payerName.substring(0, 53);
+  let generatedBy = bill.payerName.substring(0, 40);
   console.log(generatedBy);
 
   // Define the data object according to the XML structure
