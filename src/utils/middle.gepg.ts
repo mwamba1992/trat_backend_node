@@ -38,6 +38,9 @@ export async function sendBill(bill: Bill, billItemRepository: Repository<BillIt
 
 
 
+  let generatedBy = bill.payerName.substring(0, 53);
+  console.log(generatedBy);
+
   // Define the data object according to the XML structure
   const gepgBillSubReq = {
     gepgBillSubReq: {
@@ -56,7 +59,7 @@ export async function sendBill(bill: Bill, billItemRepository: Repository<BillIt
         PyrName: bill.payerName,
         BillDesc: bill.billDescription,
         BillGenDt: formattedDateStringGeneratedDate,
-        BillGenBy: bill.payerName.substring(0, 53),
+        BillGenBy: generatedBy,
         BillApprBy: 'TRAIS VERSION 2',
         PyrCellNum: bill.payerPhone,
         PyrEmail: Constants.REGISTER_EMAIL,
