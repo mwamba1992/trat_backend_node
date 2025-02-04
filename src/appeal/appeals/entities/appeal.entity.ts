@@ -42,8 +42,8 @@ export class Appeal extends  BaseEntity{
   @Column()
   natureOfRequest: string;
 
-  @ManyToOne(() => Notice, notice => notice.id)
-  notice:Notice
+  @ManyToOne(() => Notice, (notice) => notice.id)
+  notice: Notice;
 
   @ManyToOne(() => CommonSetup, (taxType) => taxType.id, { nullable: false })
   @JoinColumn({ name: 'taxId' })
@@ -53,11 +53,9 @@ export class Appeal extends  BaseEntity{
   @JoinColumn({ name: 'statusTrend' })
   statusTrend: CommonSetup;
 
-
   @OneToOne(() => Bill, { nullable: true })
   @JoinColumn({ name: 'billId' })
   billId: Bill;
-
 
   @ManyToMany(() => Party)
   @JoinTable()
@@ -106,7 +104,6 @@ export class Appeal extends  BaseEntity{
   })
   @JoinColumn({ name: 'amount_id', referencedColumnName: 'id' }) // Foreign key column in the database
   appealAmount: AppealAmount[];
-
 
   @Column({
     type: "enum",

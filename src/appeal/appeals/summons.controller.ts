@@ -1,5 +1,14 @@
 // summons.controller.ts
-import { Controller, Get, Post, Body, Param, Put, Delete, ParseIntPipe } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Put,
+  Delete,
+  ParseIntPipe,
+} from '@nestjs/common';
 import { SummonsService } from './summons.service';
 import { Summons } from './entities/summons.entity';
 import { CreateSummonsDto } from './dto/summons.dto';
@@ -39,5 +48,13 @@ export class SummonsController {
   @Delete(':id')
   async remove(@Param('id', ParseIntPipe) id: number): Promise<void> {
     return this.summonsService.remove(id);
+  }
+
+  @Put(':id/conclude')
+  async conclude(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() data: any,
+  ): Promise<any> {
+    return this.summonsService.concludeSummons(id, data);
   }
 }
