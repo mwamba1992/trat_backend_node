@@ -7,6 +7,7 @@ import { CreateSummonsDto } from './dto/summons.dto';
 import { Judge } from '../../settings/judges/entities/judge.entity';
 import { Appeal } from './entities/appeal.entity';
 import { ProgressStatus } from './dto/appeal.status.enum';
+import { SummonsFilterDto } from './dto/summons.filter.dto';
 
 @Injectable()
 export class SummonsService {
@@ -111,5 +112,62 @@ export class SummonsService {
       appeal.progressStatus = ProgressStatus.CONCLUDED;
       this.appealRepository.save(appeal);
     });
+  }
+
+  async filterSummons(filters: SummonsFilterDto): Promise<Summons[]> {
+    try {
+      console.log('Applying filters:', filters);
+
+      // Create a query builder for the 'summons' entity
+      const queryBuilder = this.summonsRepository.createQueryBuilder('summons');
+
+      queryBuilder.leftJoinAndSelect('summons.judge', 'judge');
+      queryBuilder.leftJoinAndSelect('summons.appealList', 'appealList');
+      queryBuilder.leftJoinAndSelect(
+        'appealList.appellantList',
+        'appealAppellantList',
+      );
+      queryBuilder.leftJoinAndSelect(
+        'appealList.respondentList',
+        'appealRespondentList',
+      );
+      queryBuilder.leftJoinAndSelect(
+        'summons.applicationList',
+        'applicationList',
+      );
+
+      queryBuilder.leftJoinAndSelect(
+        'applicationList.appellantList',
+        'applicationAppellantList',
+      );
+      queryBuilder.leftJoinAndSelect(
+        'applicationList.respondentList',
+        'ApplicationRespondentList',
+      );
+
+      // Filter by start date range
+      if (filters.startDateFrom) {
+        queryBuilder.andWhere('summons.startDate >= :startDateFrom', {
+          startDateFrom: filters.startDateFrom,
+        });
+      }
+
+      // Filter by end date range
+      if (filters.startDateTo) {
+        queryBuilder.andWhere('summons.endDate <= :startDateTo', {
+          startDateTo: filters.startDateTo,
+        });
+      }
+
+      // Log the generated SQL query for debugging purposes
+      const generatedQuery = queryBuilder.getQuery();
+      console.log('Generated SQL Query:', generatedQuery);
+
+      // Execute the query and return the filtered results
+      return await queryBuilder.getMany();
+    } catch (error) {
+      console.error('Error filtering summons:', error);
+      throw new Error('Failed to filter summons. Please try again later.');
+    }
   }
 }

@@ -8,7 +8,12 @@ import { CommonSetup } from '../../settings/common-setup/entities/common-setup.e
 import { Notice } from '../notice/entities/notice.entity';
 import { AppealAmount } from './entities/appeal.amount';
 import { Party } from '../../settings/parties/entities/party.entity';
-import { generateDateRanges, getMonthName, processParties, TopAppellantDTO } from '../../utils/helper.utils';
+import {
+  generateDateRanges,
+  getMonthName,
+  processParties,
+  TopAppellantDTO,
+} from '../../utils/helper.utils';
 import { Bill } from '../../payment/bill/entities/bill.entity';
 import { Constants } from '../../utils/constants';
 import { v4 as uuidv4 } from 'uuid';
@@ -23,7 +28,6 @@ import { AppealFilterDto } from './dto/appeal.filter.dto';
 import { Fee } from '../../settings/fees/entities/fee.entity';
 import { UserContextService } from '../../auth/user/dto/user.context';
 
-;
 @Injectable()
 export class AppealsService {
   constructor(
@@ -49,38 +53,44 @@ export class AppealsService {
     private readonly yearlyCasesRepository: Repository<YearlyCases>,
     @InjectRepository(Fee)
     private readonly feeRepository: Repository<Fee>,
-    private readonly userContextService: UserContextService
-  ) {
-  }
+    private readonly userContextService: UserContextService,
+  ) {}
 
   async create(createAppealDto: CreateAppealDto): Promise<Appeal> {
-
-
     console.log(createAppealDto);
     const appeal = new Appeal();
 
     // Fetching dependent entities with error handling
     const [statusTrend, tax, notice] = await Promise.all([
-      this.commonSetupRepository.findOne({ where: { setupType: "appealStatus", name: "NEW"} }),
-      this.commonSetupRepository.findOne({ where: { id: createAppealDto.taxes } }),
-      this.noticeRepository.findOne({ where: { id: createAppealDto.notice } })
+      this.commonSetupRepository.findOne({
+        where: { setupType: 'appealStatus', name: 'NEW' },
+      }),
+      this.commonSetupRepository.findOne({
+        where: { id: createAppealDto.taxes },
+      }),
+      this.noticeRepository.findOne({ where: { id: createAppealDto.notice } }),
     ]);
 
     // Handle not found errors
     if (!statusTrend) {
-      throw new NotFoundException(`Status trend with ID ${createAppealDto.statusTrend} not found`);
+      throw new NotFoundException(
+        `Status trend with ID ${createAppealDto.statusTrend} not found`,
+      );
     }
     if (!tax) {
-      throw new NotFoundException(`Tax with ID ${createAppealDto.taxes} not found`);
+      throw new NotFoundException(
+        `Tax with ID ${createAppealDto.taxes} not found`,
+      );
     }
     if (!notice) {
-      throw new NotFoundException(`Notice with ID ${createAppealDto.notice} not found`);
+      throw new NotFoundException(
+        `Notice with ID ${createAppealDto.notice} not found`,
+      );
     }
 
     // Set initial appeal data
     appeal.statusTrend = statusTrend;
     appeal.taxes = tax;
-
 
     appeal.createdBy = this.userContextService.getUser().username;
     appeal.updatedBy = this.userContextService.getUser().username;
@@ -90,44 +100,58 @@ export class AppealsService {
     appeal.bankNo = createAppealDto.bankNo;
     appeal.notice = notice;
     appeal.remarks = createAppealDto.remarks;
-    appeal.dateOfDecision = null
-    appeal.dateOfLastOrder = null
-    appeal.concludingDate = null
+    appeal.dateOfDecision = null;
+    appeal.dateOfLastOrder = null;
+    appeal.concludingDate = null;
 
     // Process appellants and respondents using an external function
-    const { applicants, respondents } = await processParties(createAppealDto, this.partyRepository);
+    const { applicants, respondents } = await processParties(
+      createAppealDto,
+      this.partyRepository,
+    );
     appeal.appellantList = applicants;
     appeal.respondentList = respondents;
-    appeal.trabAppeals = createAppealDto.applicationss
+    appeal.trabAppeals = createAppealDto.applicationss;
 
     // Create appeal amounts
     // Assign the created appeal amounts to the appeal
-    appeal.appealAmount = await Promise.all(createAppealDto.amountCurrencyList.map(async (amountList) => {
-      const amount = JSON.parse(JSON.stringify(amountList)); // Create a deep copy if needed
-      const appealAmount = new AppealAmount();
-      appealAmount.amount = amount.amount;
-      appealAmount.amountAllowed = 0;
+    appeal.appealAmount = await Promise.all(
+      createAppealDto.amountCurrencyList.map(async (amountList) => {
+        const amount = JSON.parse(JSON.stringify(amountList)); // Create a deep copy if needed
+        const appealAmount = new AppealAmount();
+        appealAmount.amount = amount.amount;
+        appealAmount.amountAllowed = 0;
 
-      // Fetch the currency asynchronously
-      const currency = await this.commonSetupRepository.findOne({ where: { name: amount.currency } });
-      if (currency) {
-        appealAmount.currency = currency;
-      }
+        // Fetch the currency asynchronously
+        const currency = await this.commonSetupRepository.findOne({
+          where: { name: amount.currency },
+        });
+        if (currency) {
+          appealAmount.currency = currency;
+        }
 
-      return appealAmount;
-    }));
-
+        return appealAmount;
+      }),
+    );
 
     const region = await this.fetchRegion(createAppealDto.region);
 
     // Generate application number based on the latest application and region
     const latestAppeals = await this.findTopAppealById();
     const currentYear = new Date().getFullYear();
-    appeal.appealNo = this.generateAppealNumber(latestAppeals, currentYear, region);
+    appeal.appealNo = this.generateAppealNumber(
+      latestAppeals,
+      currentYear,
+      region,
+    );
 
-
-    if (notice.noticeType === "2") {
-      await this.handleBillCreation(createAppealDto, applicants, respondents, appeal.appealNo);
+    if (notice.noticeType === '2') {
+      await this.handleBillCreation(
+        createAppealDto,
+        applicants,
+        respondents,
+        appeal.appealNo,
+      );
       const newAppeal = this.appealRepository.create(appeal);
       return this.appealRepository.save(newAppeal);
     } else {
@@ -138,17 +162,33 @@ export class AppealsService {
 
   async findAll(): Promise<Appeal[]> {
     return this.appealRepository.find({
-      relations: ['notice', 'taxes', 'statusTrend', 'billId', 'appellantList', 'respondentList', 'appealAmount'],
+      relations: [
+        'notice',
+        'taxes',
+        'statusTrend',
+        'billId',
+        'appellantList',
+        'respondentList',
+        'appealAmount',
+      ],
       order: {
-        createdAt: "DESC"
-      }
+        createdAt: 'DESC',
+      },
     });
   }
 
   async findOne(id: number): Promise<Appeal> {
     const appeal = await this.appealRepository.findOne({
       where: { id },
-      relations: ['notice', 'taxes', 'statusTrend', 'billId', 'appellantList', 'respondentList', 'appealAmount'],
+      relations: [
+        'notice',
+        'taxes',
+        'statusTrend',
+        'billId',
+        'appellantList',
+        'respondentList',
+        'appealAmount',
+      ],
     });
 
     if (!appeal) {
@@ -169,8 +209,11 @@ export class AppealsService {
     await this.appealRepository.remove(appeal);
   }
 
-
-  private generateAppealNumber(latestAppeal: Appeal | null, currentYear: number, region: CommonSetup): string {
+  private generateAppealNumber(
+    latestAppeal: Appeal | null,
+    currentYear: number,
+    region: CommonSetup,
+  ): string {
     if (!latestAppeal) {
       return `${region.name}.1/${currentYear}`;
     }
@@ -187,11 +230,10 @@ export class AppealsService {
   async findTopAppealById(): Promise<Appeal | null> {
     return this.appealRepository
       .createQueryBuilder('appeal')
-      .orderBy('appeal.id', 'DESC')  // Sort by 'noticeId' in descending order
+      .orderBy('appeal.id', 'DESC') // Sort by 'noticeId' in descending order
       .limit(1) // Only return the first (top) result
       .getOne();
   }
-
 
   // Helper function to fetch region data
   private async fetchRegion(regionId: number) {
@@ -200,17 +242,34 @@ export class AppealsService {
     });
   }
 
-
-  private async handleBillCreation(createAppealDto: CreateAppealDto, applicants: Party[], respondents: Party[], applicationNo: string) {
-
-    const fee = await this.feeRepository.findOne({ where: { type: "APPEAL" } , relations: ['gfs']});
+  private async handleBillCreation(
+    createAppealDto: CreateAppealDto,
+    applicants: Party[],
+    respondents: Party[],
+    applicationNo: string,
+  ) {
+    const fee = await this.feeRepository.findOne({
+      where: { type: 'APPEAL' },
+      relations: ['gfs'],
+    });
 
     // Step 1: Create the bill
-    const bill = await this.createBill(createAppealDto, respondents,applicants, applicationNo, fee);
-
+    const bill = await this.createBill(
+      createAppealDto,
+      respondents,
+      applicants,
+      applicationNo,
+      fee,
+    );
 
     // Step 2: Create the bill item
-    await createBillItem(bill, "fee for appeal" + applicationNo, this.billItemRepository,fee, "APPEAL");
+    await createBillItem(
+      bill,
+      'fee for appeal' + applicationNo,
+      this.billItemRepository,
+      fee,
+      'APPEAL',
+    );
 
     // Step 3: Send bill to GEPG and create notice if successful
     const isBillSent = await sendBill(bill, this.billItemRepository);
@@ -219,9 +278,13 @@ export class AppealsService {
     }
   }
 
-
-  async createBill(createAppealDto: CreateAppealDto,
-                   respondents: Party[], applicants: Party[], appealNo: string, fee:Fee) {
+  async createBill(
+    createAppealDto: CreateAppealDto,
+    respondents: Party[],
+    applicants: Party[],
+    appealNo: string,
+    fee: Fee,
+  ) {
     const bill = new Bill();
     bill.billedAmount = fee.amount;
     bill.status = 'PENDING';
@@ -234,14 +297,13 @@ export class AppealsService {
     bill.billEquivalentAmount = fee.amount;
     bill.miscellaneousAmount = 0;
     bill.payerPhone = applicants[0].phone_number;
-    bill.payerName = applicants.map(applicant => applicant.name).join(' ');
+    bill.payerName = applicants.map((applicant) => applicant.name).join(' ');
     bill.payerEmail = Constants.REGISTER_EMAIL;
     bill.billPayType = Constants.FULL_BILL_PAY_TYPE;
-    bill.currency = "TZS"
+    bill.currency = 'TZS';
 
     const uuid = uuidv4(); // Full UUID
     bill.billId = uuid.split('-')[0];
-
 
     // Set expiry date (14 days from today)
     const expiryDate = new Date();
@@ -260,10 +322,7 @@ export class AppealsService {
     bill.financialYear = '2024/2025';
 
     return await this.billRepository.save(bill);
-
-
   }
-
 
   // Method to get top 5 appellants with appeal counts
   async getTopAppellants(): Promise<TopAppellantDTO[]> {
@@ -272,30 +331,38 @@ export class AppealsService {
       .innerJoin(
         'appeal_appellant_list_party', // The join table containing party and appeal IDs
         'join', // Alias for the join table
-        'party.id = join.partyId' // Join condition between Party and the join table
+        'party.id = join.partyId', // Join condition between Party and the join table
       )
-      .select('join.partyId', 'partyId')  // Select the partyId from the join table
-      .addSelect('COUNT(join.appealId)', 'appealCount')  // Count the number of appeals for each party
+      .select('join.partyId', 'partyId') // Select the partyId from the join table
+      .addSelect('COUNT(join.appealId)', 'appealCount') // Count the number of appeals for each party
       .groupBy('join.partyId') // Group by partyId
       .orderBy('COUNT(join.appealId)', 'DESC') // Order by the count in descending order
       .limit(5) // Limit to top 5 parties
-      .getRawMany();  // Fetch raw data
+      .getRawMany(); // Fetch raw data
 
     // loop to get id, name , count
-    return await Promise.all(result.map(async (item) => {
-      const party = await this.partyRepository.findOne({ where: { id: item.partyId } });
-      const topAppellant = new TopAppellantDTO();
-      topAppellant.id = item.partyId;
-      topAppellant.name = party.name;
-      topAppellant.appealCount = item.appealCount;
-      return topAppellant;
-    }));
+    return await Promise.all(
+      result.map(async (item) => {
+        const party = await this.partyRepository.findOne({
+          where: { id: item.partyId },
+        });
+        const topAppellant = new TopAppellantDTO();
+        topAppellant.id = item.partyId;
+        topAppellant.name = party.name;
+        topAppellant.appealCount = item.appealCount;
+        return topAppellant;
+      }),
+    );
   }
 
   async getCardsStatistics() {
     const filledAppeals = await this.appealRepository.find();
-    const pendingAppeals = await this.appealRepository.find({ where: { progressStatus: Not(ProgressStatus.DECIDED) } });
-    const resolvedAppeals = await this.appealRepository.find({ where: { progressStatus: ProgressStatus.DECIDED } });
+    const pendingAppeals = await this.appealRepository.find({
+      where: { progressStatus: Not(ProgressStatus.DECIDED) },
+    });
+    const resolvedAppeals = await this.appealRepository.find({
+      where: { progressStatus: ProgressStatus.DECIDED },
+    });
     const filledApplication = await this.applicationRegisterRepository.find();
     const filledAppealsCount = filledAppeals.length;
     const pendingAppealsCount = pendingAppeals.length;
@@ -306,15 +373,12 @@ export class AppealsService {
       filledAppealsCount,
       pendingAppealsCount,
       resolvedAppealsCount,
-      filledApplicationCount
-    ]
-
+      filledApplicationCount,
+    ];
   }
 
-
-  @Cron('*/30 * * * *')  // This runs the cron job every 2 minutes/ Run every 30 minutes
+  @Cron('*/30 * * * *') // This runs the cron job every 2 minutes/ Run every 30 minutes
   async updateYearlyCases() {
-
     try {
       console.log('######## inside updating new cases ##########');
 
@@ -322,11 +386,13 @@ export class AppealsService {
       const currentYear = new Date().getFullYear();
       const currentMonth = new Date().getMonth() + 1;
 
-      const formatter = new Intl.DateTimeFormat('en-GB', { year: 'numeric', month: '2-digit', day: '2-digit' });
-
+      const formatter = new Intl.DateTimeFormat('en-GB', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+      });
 
       const dateRanges = generateDateRanges(currentYear);
-
 
       // Loop through status to fetch and update data
       for (const st of status) {
@@ -340,36 +406,38 @@ export class AppealsService {
           if (st === 'new') {
             const appeals = await this.appealRepository.find({
               where: {
-                createdAt: Between(startDate, endDate),  // $gte for startDate// $lt for endDate
-                progressStatus: Not(ProgressStatus.DECIDED) || Not(ProgressStatus.CONCLUDED) || Not(ProgressStatus.HEARING)
-              }
+                createdAt: Between(startDate, endDate), // $gte for startDate// $lt for endDate
+                progressStatus:
+                  Not(ProgressStatus.DECIDED) ||
+                  Not(ProgressStatus.CONCLUDED) ||
+                  Not(ProgressStatus.HEARING),
+              },
             });
             count = appeals.length;
           } else if (st === 'decided') {
             const appeals = await this.appealRepository.find({
               where: {
-                dateOfDecision: Between(startDate, endDate),  // $gte for startDate// $lt for endDate
-                progressStatus: ProgressStatus.DECIDED
-              }
+                dateOfDecision: Between(startDate, endDate), // $gte for startDate// $lt for endDate
+                progressStatus: ProgressStatus.DECIDED,
+              },
             });
             count = appeals.length;
           } else if (st === 'pending') {
-            const appeals = await this.appealRepository.find({
+            await this.appealRepository.find({
               where: {
-                createdAt: Between(startDate, endDate),  // $gte for startDate// $lt for endDate
-                progressStatus: ProgressStatus.PENDING
-              }
+                createdAt: Between(startDate, endDate), // $gte for startDate// $lt for endDate
+                progressStatus: ProgressStatus.PENDING,
+              },
             });
           }
-
 
           // Set the monthly count
 
           if (i == 0) {
-            yearlyCases.jan = count
+            yearlyCases.jan = count;
           }
           if (i == 1) {
-            yearlyCases.feb = count
+            yearlyCases.feb = count;
           }
           if (i == 2) {
             yearlyCases.mar = count;
@@ -401,12 +469,11 @@ export class AppealsService {
           if (i == 11) {
             yearlyCases.dec = count;
           }
-
         }
 
         // Save or update the yearly cases
         const existingRecord = await this.yearlyCasesRepository.findOne({
-          where: { id: st }
+          where: { id: st },
         });
         if (existingRecord) {
           // Update existing record
@@ -422,17 +489,26 @@ export class AppealsService {
     }
   }
 
-
   getMonthName(index: number) {
     const monthNames = [
-      'jan', 'feb', 'mar', 'apr', 'may', 'jun',
-      'jul', 'aug', 'sep', 'oct', 'nov', 'dec'
+      'jan',
+      'feb',
+      'mar',
+      'apr',
+      'may',
+      'jun',
+      'jul',
+      'aug',
+      'sep',
+      'oct',
+      'nov',
+      'dec',
     ];
     return monthNames[index];
   }
 
   async getCaseSummary(): Promise<any> {
-    const yearlyCases = await this.yearlyCasesRepository.find();  // Get all YearlyCases from DB
+    const yearlyCases = await this.yearlyCasesRepository.find(); // Get all YearlyCases from DB
 
     const finishList = [];
 
@@ -456,10 +532,8 @@ export class AppealsService {
       finishList.push(map);
     }
 
-
     return finishList; // Returning the case summary
   }
-
 
   async filterAppeals(filters: AppealFilterDto): Promise<Appeal[]> {
     // Create a query builder for the
@@ -476,26 +550,35 @@ export class AppealsService {
       .leftJoinAndSelect('appeal.appealAmount', 'appealAmount')
       .leftJoinAndSelect('appealAmount.currency', 'currency');
 
-
     // Filter by date range for filing
     if (filters.dateOfFillingFrom) {
-      queryBuilder.andWhere('appeal.dateOfFilling >= :dateOfFillingFrom', { dateOfFillingFrom: filters.dateOfFillingFrom });
+      queryBuilder.andWhere('appeal.dateOfFilling >= :dateOfFillingFrom', {
+        dateOfFillingFrom: filters.dateOfFillingFrom,
+      });
     }
     if (filters.dateOfFillingTo) {
-      queryBuilder.andWhere('appeal.dateOfFilling <= :dateOfFillingTo', { dateOfFillingTo: filters.dateOfFillingTo });
+      queryBuilder.andWhere('appeal.dateOfFilling <= :dateOfFillingTo', {
+        dateOfFillingTo: filters.dateOfFillingTo,
+      });
     }
 
     // Filter by date range for decision
     if (filters.dateOfDecisionFrom) {
-      queryBuilder.andWhere('appeal.dateOfDecision >= :dateOfDecisionFrom', { dateOfDecisionFrom: filters.dateOfDecisionFrom });
+      queryBuilder.andWhere('appeal.dateOfDecision >= :dateOfDecisionFrom', {
+        dateOfDecisionFrom: filters.dateOfDecisionFrom,
+      });
     }
     if (filters.dateOfDecisionTo) {
-      queryBuilder.andWhere('appeal.dateOfDecision <= :dateOfDecisionTo', { dateOfDecisionTo: filters.dateOfDecisionTo });
+      queryBuilder.andWhere('appeal.dateOfDecision <= :dateOfDecisionTo', {
+        dateOfDecisionTo: filters.dateOfDecisionTo,
+      });
     }
 
     // Filter by progress status
     if (filters.progressStatus) {
-      queryBuilder.andWhere('appeal.progressStatus = :progressStatus', { progressStatus: filters.progressStatus });
+      queryBuilder.andWhere('appeal.progressStatus = :progressStatus', {
+        progressStatus: filters.progressStatus,
+      });
     }
     // Filter by appellant list (match by appellant ID)
     if (filters.appellantList && filters.appellantList) {
@@ -510,17 +593,16 @@ export class AppealsService {
       });
     }
 
-
     console.log(queryBuilder.getQuery());
     // Execute the query and return filtered results
     return await queryBuilder.getMany();
   }
 
-  save(appeal: Appeal){
+  save(appeal: Appeal) {
     return this.appealRepository.save(appeal);
   }
 
-  findByAppealNo(appealNo:string){
-    return this.appealRepository.findOne({where:{appealNo: appealNo}});
+  findByAppealNo(appealNo: string) {
+    return this.appealRepository.findOne({ where: { appealNo: appealNo } });
   }
 }

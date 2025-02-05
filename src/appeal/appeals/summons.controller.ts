@@ -12,6 +12,7 @@ import {
 import { SummonsService } from './summons.service';
 import { Summons } from './entities/summons.entity';
 import { CreateSummonsDto } from './dto/summons.dto';
+import { SummonsFilterDto } from "./dto/summons.filter.dto";
 
 @Controller('summons')
 export class SummonsController {
@@ -56,5 +57,9 @@ export class SummonsController {
     @Body() data: any,
   ): Promise<any> {
     return this.summonsService.concludeSummons(id, data);
+  }
+  @Post('/filter')
+  async filterSummons(@Body() filterDto: SummonsFilterDto): Promise<Summons[]> {
+    return this.summonsService.filterSummons(filterDto);
   }
 }

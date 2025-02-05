@@ -1,10 +1,8 @@
 // appeal-filter.dto.ts
 import { IsOptional, IsEnum, IsString, IsDateString } from 'class-validator';
-import { ProgressStatus } from '../dto/appeal.status.enum';
+import { ProgressStatus } from './appeal.status.enum';
 
 export class AppealFilterDto {
-
-
   @IsOptional()
   @IsDateString()
   dateOfFillingFrom?: string;

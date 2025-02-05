@@ -32,19 +32,26 @@ export class Party extends  BaseEntity{
   @Column({ type: 'varchar', nullable: true})
   vat_number: string;
 
-  @ManyToOne(() => CommonSetup, commonSetup => commonSetup.id)
-  type: CommonSetup
+  @ManyToOne(() => CommonSetup, (commonSetup) => commonSetup.id)
+  type: CommonSetup;
 
-
-  @ManyToMany(() => ApplicationRegister, (applicationRegister) => applicationRegister.appellantList)
+  @ManyToMany(
+    () => ApplicationRegister,
+    (applicationRegister) => applicationRegister.appellantList,
+  )
   respondents: ApplicationRegister[];
 
-  @ManyToMany(() => ApplicationRegister, (applicationRegister) => applicationRegister.appellantList)
+  @ManyToMany(
+    () => ApplicationRegister,
+    (applicationRegister) => applicationRegister.appellantList,
+  )
   applicants: ApplicationRegister[];
 
-  @ManyToMany(() => ApplicationRegister, (applicationRegister) => applicationRegister.appellantList)
+  @ManyToMany(
+    () => ApplicationRegister,
+    (applicationRegister) => applicationRegister.appellantList,
+  )
   applicationRegisters: ApplicationRegister[];
-
 
   @ManyToMany(() => Appeal, (appeal) => appeal.appellantList)
   appellantList: Appeal[];

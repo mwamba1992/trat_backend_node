@@ -17,27 +17,24 @@ import { Party } from '../../../settings/parties/entities/party.entity';
 import { AppealAmount } from './appeal.amount';
 import { ProgressStatus } from '../dto/appeal.status.enum';
 import { Summons } from './summons.entity';
-import { ApplicationRegister } from '../../application-register/entities/application-register.entity';
 import { NoticeHighCourt } from '../../notice/entities/notice.high.court';
 
 @Entity()
-export class Appeal extends  BaseEntity{
-
+export class Appeal extends BaseEntity {
   @Column()
-  appealNo:string
+  appealNo: string;
 
   @CreateDateColumn({ type: 'date' })
   dateOfFilling: Date;
 
-  @CreateDateColumn({ type: 'date' , nullable: true})
+  @CreateDateColumn({ type: 'date', nullable: true })
   dateOfDecision: Date;
 
-  @CreateDateColumn({ type: 'date' , nullable: true})
+  @CreateDateColumn({ type: 'date', nullable: true })
   concludingDate: Date;
 
-  @CreateDateColumn({ type: 'date' , nullable: true})
+  @CreateDateColumn({ type: 'date', nullable: true })
   dateOfLastOrder: Date;
-
 
   @Column()
   natureOfRequest: string;
