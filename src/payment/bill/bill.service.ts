@@ -89,13 +89,12 @@ export class BillService {
       billItem.billItemAmount = cart.billedAmount;
       billItem.billItemEqvAmount = cart.billedAmount;
       billItem.billItemMiscAmount = 0;
-      billItem.billItemRef =  cart.sourceName;
+      billItem.billItemRef = cart.sourceName;
       billItem.gfsCode = fee.gfs.name;
       billItem.bill = saveBill
-      billItem.sourceName = "OTHERS"
+      billItem.sourceName = 'OTHERS';
       await this.billItemRepository.save(billItem);
     }
-
 
     await sendBill(bill, this.billItemRepository);
   }
@@ -121,50 +120,54 @@ export class BillService {
     return `This action removes a #${id} bill`;
   }
 
-   async receiveBill(response: any){
-
+  async receiveBill(response: any) {
     console.log(response);
     const parsedData = await parseStringPromise(response);
 
-     // Access the parsed XML structure
-     const billId = parsedData?.Gepg?.gepgBillSubResp?.[0]?.BillTrxInf?.[0]?.BillId?.[0];
-     const controlNumber = parsedData?.Gepg?.gepgBillSubResp?.[0]?.BillTrxInf?.[0]?.PayCntrNum?.[0];
-     const trxSts = parsedData?.Gepg?.gepgBillSubResp?.[0]?.BillTrxInf?.[0]?.TrxSts?.[0];
-     const trxStsCode = parsedData?.Gepg?.gepgBillSubResp?.[0]?.BillTrxInf?.[0]?.TrxStsCode?.[0];
-     const signature = parsedData?.Gepg?.gepgSignature?.[0];
+    // Access the parsed XML structure
+    const billId =
+      parsedData?.Gepg?.gepgBillSubResp?.[0]?.BillTrxInf?.[0]?.BillId?.[0];
+    const controlNumber =
+      parsedData?.Gepg?.gepgBillSubResp?.[0]?.BillTrxInf?.[0]?.PayCntrNum?.[0];
+    const trxSts =
+      parsedData?.Gepg?.gepgBillSubResp?.[0]?.BillTrxInf?.[0]?.TrxSts?.[0];
+    const trxStsCode =
+      parsedData?.Gepg?.gepgBillSubResp?.[0]?.BillTrxInf?.[0]?.TrxStsCode?.[0];
+    const signature = parsedData?.Gepg?.gepgSignature?.[0];
 
-     console.log({ billId, controlNumber, trxSts, trxStsCode, signature });
+    console.log({ billId, controlNumber, trxSts, trxStsCode, signature });
 
-     // saving  bill update
-     const  bill = await this.billRepository.findOne({where: {billId: billId}});
-     bill.billControlNumber = controlNumber;
-     bill.responseCode = trxStsCode;
+    // saving  bill update
+    const bill = await this.billRepository.findOne({
+      where: { billId: billId },
+    });
+    bill.billControlNumber = controlNumber;
+    bill.responseCode = trxStsCode;
 
-     await this.billRepository.save(bill);
+    await this.billRepository.save(bill);
 
-     return  ""
-
+    return '';
   }
 
-
-  saveBill(bill: Bill){
+  saveBill(bill: Bill) {
     return this.billRepository.save(bill);
   }
 
-
-  findBillByControlNUmber(controlNumber:string){
-    return this.billRepository.findOne({where: {billControlNumber: controlNumber}});
-
+  findBillByControlNUmber(controlNumber: string) {
+    return this.billRepository.findOne({
+      where: { billControlNumber: controlNumber },
+    });
   }
 
-  findByBillId(billId:string){
-    return this.billRepository.findOne({where: {billId: billId}});
+  findByBillId(billId: string) {
+    return this.billRepository.findOne({ where: { billId: billId } });
   }
-
 
   async resendBill(billId: string) {
     console.log(billId);
-    await sendBill(await this.findByBillId("b2f876b6"), this.billItemRepository);
+    await sendBill(
+      await this.findByBillId('24c5b843'),
+      this.billItemRepository,
+    );
   }
-
 }

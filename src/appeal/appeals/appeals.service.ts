@@ -10,10 +10,10 @@ import { AppealAmount } from './entities/appeal.amount';
 import { Party } from '../../settings/parties/entities/party.entity';
 import {
   generateDateRanges,
-  getMonthName,
+  getMonthName, isValidaPhone,
   processParties,
-  TopAppellantDTO,
-} from '../../utils/helper.utils';
+  TopAppellantDTO
+} from "../../utils/helper.utils";
 import { Bill } from '../../payment/bill/entities/bill.entity';
 import { Constants } from '../../utils/constants';
 import { v4 as uuidv4 } from 'uuid';
@@ -296,6 +296,10 @@ export class AppealsService {
     bill.billPayed = false;
     bill.billEquivalentAmount = fee.amount;
     bill.miscellaneousAmount = 0;
+
+    if (!isValidaPhone(applicants[0].phone_number)) {
+      throw new Error('Invalid phone number');
+    }
     bill.payerPhone = applicants[0].phone_number;
     bill.payerName = applicants.map((applicant) => applicant.name).join(' ');
     bill.payerEmail = Constants.REGISTER_EMAIL;
