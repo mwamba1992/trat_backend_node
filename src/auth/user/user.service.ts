@@ -1,6 +1,9 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
@@ -9,7 +12,6 @@ import { encodePassword } from '../../utils/helper.utils';
 
 @Injectable()
 export class UserService {
-
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
@@ -17,52 +19,67 @@ export class UserService {
     private readonly roleRepository: Repository<Role>,
   ) {}
 
-
   async create(createUserDto: CreateUserDto) {
     console.log(createUserDto);
 
     // check if email is available
 
-    if(await this.userRepository.findOne({where: {email: createUserDto.email}})){
+    if (
+      await this.userRepository.findOne({
+        where: { email: createUserDto.email },
+      })
+    ) {
       throw new ConflictException('Email already exists');
     }
 
-
-    if(await this.userRepository.findOne({where: {username: createUserDto.username}})){
+    if (
+      await this.userRepository.findOne({
+        where: { username: createUserDto.username },
+      })
+    ) {
       throw new ConflictException('Username already exists');
     }
 
-    if(await this.userRepository.findOne({where: {mobileNumber: createUserDto.mobileNumber}})){
+    if (
+      await this.userRepository.findOne({
+        where: { mobileNumber: createUserDto.mobileNumber },
+      })
+    ) {
       throw new ConflictException('Mobile Number already exists');
     }
 
-    if(await this.userRepository.findOne({where: {checkNumber: createUserDto.checkNumber}})){
+    if (
+      await this.userRepository.findOne({
+        where: { checkNumber: createUserDto.checkNumber },
+      })
+    ) {
       throw new ConflictException('Check Number already exists');
     }
 
     try {
+      const user = new User();
+      user.active = true;
+      user.createdAt = new Date();
+      user.email = createUserDto.email;
+      user.checkNumber = createUserDto.checkNumber;
+      user.mobileNumber = createUserDto.mobileNumber;
+      user.password = await encodePassword('Trat@1234*');
+      user.name = createUserDto.name;
+      user.username = createUserDto.username;
+      user.address = '';
 
-    const user = new User();
-    user.active = true;
-    user.createdAt = new Date();
-    user.email = createUserDto.email;
-    user.checkNumber = createUserDto.checkNumber;
-    user.mobileNumber = createUserDto.mobileNumber;
-    user.password =  await encodePassword("Trat@1234*");
-    user.name = createUserDto.name;
-    user.username = createUserDto.username;
-    user.address = ""
+      const roleList: Role[] = [];
 
-    const roleList: Role[] = [];
+      for (const roleId of createUserDto.rolesList) {
+        const role = await this.roleRepository.findOne({
+          where: { id: roleId },
+        });
+        roleList.push(role);
+      }
 
-    for (const roleId of createUserDto.rolesList) {
-      const role = await this.roleRepository.findOne({where: {id: roleId}});
-      roleList.push(role);
-    }
-
-    user.rolesList = roleList;
-    return this.userRepository.save(user);
-    }catch (Error){
+      user.rolesList = roleList;
+      return this.userRepository.save(user);
+    } catch (Error) {
       console.log(Error);
       return Error;
     }
@@ -70,16 +87,15 @@ export class UserService {
 
   async findAll(): Promise<User[]> {
     const users = await this.userRepository.find({
-      relations: ['rolesList'] ,
+      relations: ['rolesList'],
       order: {
-        createdAt: "DESC"
-      }});
-    return users.map(user => user);
+        createdAt: 'DESC',
+      },
+    });
+    return users.map((user) => user);
   }
 
-
-
-   async  findOne(id: number) {
+  async findOne(id: number) {
     const user = await this.userRepository.findOne({
       where: { id },
       relations: ['rolesList'],
@@ -89,7 +105,6 @@ export class UserService {
     }
     return user;
   }
-
 
   async findOneByEmail(email: string) {
     const user = await this.userRepository.findOne({
@@ -113,7 +128,7 @@ export class UserService {
     return user;
   }
   async update(id: number, updateUserDto: CreateUserDto) {
-    console.log("### inside update #######" + updateUserDto);
+    console.log('### inside update #######' + updateUserDto);
     const user = await this.findOne(id);
     // Update user fields
     Object.assign(user, updateUserDto);
@@ -121,7 +136,7 @@ export class UserService {
     const roleList: Role[] = [];
 
     for (const roleId of updateUserDto.rolesList) {
-      const role = await this.roleRepository.findOne({where: {id: roleId}});
+      const role = await this.roleRepository.findOne({ where: { id: roleId } });
       roleList.push(role);
     }
 
@@ -131,14 +146,13 @@ export class UserService {
     return user;
   }
 
-// Delete a user
-  async remove(id:  number): Promise<void> {
+  // Delete a user
+  async remove(id: number): Promise<void> {
     const user = await this.findOne(id);
     await this.userRepository.remove(user);
   }
 
-
-  async  addRoleToUser(userId: number, roleId: number) {
+  async addRoleToUser(userId: number, roleId: number) {
     const user = await this.findOne(userId);
     const role = await this.roleRepository.findOne({
       where: { id: roleId },
@@ -154,11 +168,21 @@ export class UserService {
   }
 
   async resetPassword(id: number) {
-    console.log("##### inside reset password ######")
+    console.log('##### inside reset password ######');
     const user = await this.findOne(id);
-    user.password = await encodePassword("Trat@1234*");
+    user.password = await encodePassword('Trat@1234*');
     await this.userRepository.save(user);
     return user;
+  }
 
+  async changePassword(id: number, oldPassword: string, newPassword: string) {
+    console.log('##### inside change password ######');
+    const user = await this.findOne(id);
+    if (user.password !== (await encodePassword(oldPassword))) {
+      throw new NotFoundException(`Old password is incorrect`);
+    }
+    user.password = await encodePassword(newPassword);
+    await this.userRepository.save(user);
+    return user;
   }
 }

@@ -43,9 +43,22 @@ export class UserController {
     return this.userService.addRoleToUser(+id, +userId);
   }
 
-  @Put("/reset-password/:id")
+  @Put('/reset-password/:id')
   @UseGuards(AuthGuard)
   resetPassword(@Param('id') id: string) {
     return this.userService.resetPassword(+id);
+  }
+
+  @Put('/update-password/:id')
+  @UseGuards(AuthGuard)
+  updatePassword(
+    @Param('id') id: number,
+    @Body() updateUserDto: UpdateUserDto,
+  ) {
+    return this.userService.changePassword(
+      id,
+      updateUserDto.oldPassword,
+      updateUserDto.newPassword,
+    );
   }
 }
