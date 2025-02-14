@@ -177,6 +177,7 @@ export class UserService {
 
   async changePassword(id: number, oldPassword: string, newPassword: string) {
     console.log('##### inside change password ######');
+    console.log('##### old password ######' + oldPassword);
     const user = await this.findOne(id);
     if (user.password !== (await encodePassword(oldPassword))) {
       throw new NotFoundException(`Old password is incorrect`);
