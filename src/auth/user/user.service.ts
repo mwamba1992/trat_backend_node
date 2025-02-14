@@ -8,7 +8,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
 import { Role } from '../role/entities/role.entity';
-import { encodePassword } from '../../utils/helper.utils';
+import { decodePassword, encodePassword } from "../../utils/helper.utils";
 
 @Injectable()
 export class UserService {
@@ -179,7 +179,9 @@ export class UserService {
     console.log('##### inside change password ######');
     console.log('##### old password ######' + oldPassword);
     const user = await this.findOne(id);
-    if (user.password !== (await encodePassword(oldPassword))) {
+
+    const isPasswordValid = await decodePassword(oldPassword, user.password);
+    if (!isPasswordValid) {
       throw new NotFoundException(`Old password is incorrect`);
     }
     user.password = await encodePassword(newPassword);
