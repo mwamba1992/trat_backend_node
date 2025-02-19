@@ -172,7 +172,7 @@ export class AppealsService {
         'appealAmount',
       ],
       order: {
-        createdAt: 'DESC',
+        dateOfFilling: 'DESC',
       },
     });
   }
