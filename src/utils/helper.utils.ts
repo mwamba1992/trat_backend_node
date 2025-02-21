@@ -108,7 +108,8 @@ export function getMonthName(index: number) {
 }
 
 // Method to format date from dd/MM/yyyy to yyyy-MM-dd
-export function formatDate(dateString: string): string {
+export function formatDate(dateString: string): Date {
+  console.log(dateString);
   // Split the input date (e.g. 15/05/2024) into day, month, year
   const [day, month, year] = dateString
     .split('/')
@@ -117,10 +118,12 @@ export function formatDate(dateString: string): string {
   // Create a new Date object using the parsed values (Note: months are 0-indexed in JavaScript)
   const date = new Date(year, month - 1, day);
 
+  console.log('date', date);
+
   // Format the date as yyyy-MM-dd using toISOString and string manipulation
 
   // Gets 'yyyy-MM-dd'
-  return date.toISOString().split('T')[0];
+  return date;
 }
 
 export function isValidaPhone(phoneNo: string) {

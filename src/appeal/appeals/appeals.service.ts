@@ -198,8 +198,42 @@ export class AppealsService {
     return appeal;
   }
 
-  async update(id: number, updateAppealDto: UpdateAppealDto): Promise<Appeal> {
+  async update(id: number, updateAppealDto: CreateAppealDto): Promise<Appeal> {
     const existingAppeal = await this.findOne(id);
+    existingAppeal.assNo = updateAppealDto.assNo;
+    existingAppeal.dateOfFilling = updateAppealDto.dateOfFilling;
+    existingAppeal.natureOfRequest = updateAppealDto.natureOfRequest;
+    existingAppeal.bankNo = updateAppealDto.bankNo;
+    existingAppeal.remarks = updateAppealDto.remarks;
+
+    // Process appellants and respondents using an external function
+    const { applicants, respondents } = await processParties(
+      updateAppealDto,
+      this.partyRepository,
+    );
+    existingAppeal.appellantList = applicants;
+    existingAppeal.respondentList = respondents;
+    existingAppeal.trabAppeals = updateAppealDto.applicationss; // Update the trabAppeals
+
+    existingAppeal.appealAmount = await Promise.all(
+      updateAppealDto.amountCurrencyList.map(async (amountList) => {
+        const amount = JSON.parse(JSON.stringify(amountList)); // Create a deep copy if needed
+        const appealAmount = new AppealAmount();
+        appealAmount.amount = amount.amount;
+        appealAmount.amountAllowed = 0;
+
+        // Fetch the currency asynchronously
+        const currency = await this.commonSetupRepository.findOne({
+          where: { name: amount.currency },
+        });
+        if (currency) {
+          appealAmount.currency = currency;
+        }
+
+        return appealAmount;
+      }),
+    );
+
     return this.appealRepository.save(existingAppeal);
   }
 

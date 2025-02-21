@@ -51,7 +51,7 @@ export class AppealsController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateAppealDto: UpdateAppealDto) {
+  update(@Param('id') id: string, @Body() updateAppealDto: CreateAppealDto) {
     return this.appealsService.update(+id, updateAppealDto);
   }
 
@@ -94,21 +94,18 @@ export class AppealsController {
     let i = 0;
     // Step 1: Read all rows into memory and collect unique names directly into the array
     await fs
-      .createReadStream('/Users/mwendavano/trat/appeals_with_headers.csv')
+      .createReadStream('/Users/mwendavano/trat/register.csv')
       .pipe(csv())
       .on('data', async (row) => {
         i++;
-        if (row.appeal_no.split('/')[1] == '2023') {
-          console.log(row.appeal_no);
-          console.log(row.date_of_filling);
-          console.log(row.decided_date);
-          //
-
+        if (row.appeal_no.trim().split('/')[1] == '2023') {
+          console.log(row.appeal_no.trim());
           // const parties = [];
           // const appeal = await this.appealsService.findByAppealNo(
           //   row.appeal_no,
           // );
           //
+
           // if (appeal != null) {
           //   if (row.respondent_name === 'COMMISSIONER GENERAL') {
           //     const party = await this.partyService.findOne(3);
@@ -137,75 +134,99 @@ export class AppealsController {
           //     }
           //   }
           // }
-          const appeal = new Appeal();
-          const parties = [];
-          const appeals = [];
-          appeal.appealNo = row.appeal_no;
 
-          //
-          appeal.dateOfFilling = new Date(formatDate(row.date_of_filling));
-          //
-          if (row.decided_date != 'null') {
-            appeal.dateOfDecision = new Date(formatDate(row.decided_date));
+          const checkAppeal = await this.appealsService.findByAppealNo(
+            row.appeal_no.trim(),
+          );
+
+          if (!checkAppeal) {
+            console.log('not found' + row.appeal_no.trim());
+            const appeal = new Appeal();
+            const parties = [];
+            const appeals = [];
+            appeal.appealNo = row.appeal_no.trim();
+
+            //
+            if (row.date_of_filling) {
+              appeal.dateOfFilling = new Date(
+                formatDate(row.date_of_filling.trimEnd()),
+              );
+            } else {
+              appeal.dateOfFilling = formatDate('01/01/2023');
+            }
+
+            console.log('formatted ' + row.date_of_filling);
+            //
+            if (row.decided_date != 'null') {
+              appeal.dateOfDecision = formatDate(row.decided_date);
+              appeal.remarks = '';
+            } else {
+              appeal.dateOfDecision = null;
+            }
+            //
+            appeal.financialYear = '2022/2023';
+            appeal.natureOfRequest = 'nan';
+            appeal.assNo = row.ass_no;
+            appeal.billNo = row.bill_no;
+            appeal.remarks = row.remarks;
+            appeal.taxedOff = row.taxed_off;
+            //
+            //
+            let party: Party;
+            if (row.appellant_name === 'COMMISSIONER GENERAL') {
+              party = await this.partyService.findOne(3);
+            } else if (row.appellant_name === 'NONOTICE') {
+              console.log(row.notice_number);
+              const notice = await this.noticeService.findByNoticeNo(
+                row.notice_number,
+              );
+              console.log(notice);
+              party = await this.partyService.getBusinessByName(
+                notice.appellantFullName,
+              );
+            } else {
+              party = await this.partyService.getBusinessByName(
+                row.appellant_name.trim().toUpperCase(),
+              );
+
+              if (!party) {
+                party = new Party();
+                party.name = row.appellant_name.trim().toUpperCase();
+                party.phone_number = '0789000000';
+                party = await this.partyService.save(party);
+              }
+            }
+
+            parties.push(party);
+            appeal.appellantList = parties;
+            //
+            // if (!row.bill.empty) {
+            //   appeal.billId = await this.billService.findByBillId(row.bill);
+            // }
+
+            // if (row.notice_number != 'NOTICENO') {
+            //   appeal.notice = await this.noticeService.findByNoticeNo(
+            //     row.notice_number,
+            //   );
+            // } else {
+            //   appeal.notice = null;
+            // }
+
+            if (!Number.isInteger(row.status_trend)) {
+              appeal.statusTrend = await this.commonSetupService.findOne(20);
+            } else {
+              appeal.statusTrend = await this.commonSetupService.findOne(
+                row.tax_id,
+              );
+            }
+            appeal.taxes = await this.commonSetupService.findOne(row.tax_id);
+
+            console.log('saved' + appeal.appealNo);
+            appeals.push(await this.appealsService.save(appeal));
+            party.appellantList = appeals;
+            await this.partyService.save(party);
+            console.log('party saved' + party.name);
           }
-          //
-          appeal.financialYear = row.financial_year;
-          appeal.natureOfRequest = row.nature_of_appeal;
-          appeal.assNo = row.ass_no;
-          appeal.billNo = row.bill_no;
-          appeal.remarks = row.remarks;
-          appeal.taxedOff = row.taxed_off;
-          //
-          //
-          console.log(row.appellant_name.trim().toUpperCase());
-          let party: Party;
-          if (row.appellant_name === 'COMMISSIONER GENERAL') {
-            party = await this.partyService.findOne(3);
-          } else if (row.appellant_name === 'NONOTICE') {
-            console.log(row.notice_number);
-            const notice = await this.noticeService.findByNoticeNo(
-              row.notice_number,
-            );
-            console.log(notice);
-            party = await this.partyService.getBusinessByName(
-              notice.appellantFullName,
-            );
-          } else {
-            party = await this.partyService.getBusinessByName(
-              row.appellant_name.trim().toUpperCase(),
-            );
-          }
-
-          console.log(party);
-          parties.push(party);
-          appeal.appellantList = parties;
-
-          if (!row.bill.empty) {
-            appeal.billId = await this.billService.findByBillId(row.bill);
-          }
-
-          if (row.notice_number != 'NOTICENO') {
-            appeal.notice = await this.noticeService.findByNoticeNo(
-              row.notice_number,
-            );
-          } else {
-            appeal.notice = null;
-          }
-
-          if (!Number.isInteger(row.status_trend)) {
-            appeal.statusTrend = await this.commonSetupService.findOne(20);
-          } else {
-            appeal.statusTrend = await this.commonSetupService.findOne(
-              row.tax_id,
-            );
-          }
-          appeal.taxes = await this.commonSetupService.findOne(row.tax_id);
-
-          console.log('saved' + appeal.appealNo);
-          appeals.push(await this.appealsService.save(appeal));
-          party.appellantList = appeals;
-          await this.partyService.save(party);
-          console.log('party saved' + party.name);
         }
       });
     console.log('Total rows: ' + i);

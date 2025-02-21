@@ -121,5 +121,12 @@ export class Appeal extends BaseEntity {
   noticesHigh: NoticeHighCourt[];
 
 
+  setDateFromString(dateString: string): void {
+    const dateParts = dateString.split('/'); // Split 'DD/MM/YYYY'
+    const year = parseInt(dateParts[2], 10);
+    const month = parseInt(dateParts[1], 10) - 1; // Months are 0-indexed
+    const day = parseInt(dateParts[0], 10);
+    this.dateOfFilling = new Date(year, month, day); // Creates the Date object
+  }
 }
 

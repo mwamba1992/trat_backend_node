@@ -46,13 +46,13 @@ export class CreateAppealDto {
   @IsArray()
   @IsOptional()
   @ValidateNested({ each: true })
-  respondentList:  string[];
+  respondentList: string[];
 
 
   @IsArray()
   @IsOptional()
   @ValidateNested({ each: true })
-  applicationss:  string[];
+  applicationss: string[];
 
   @IsString()
   @IsOptional()
@@ -100,5 +100,5 @@ export class CreateAppealDto {
   @ValidateNested({ each: true })
   amountCurrencyList?: string[];
 
-  region:number
+  region: number;
 }
