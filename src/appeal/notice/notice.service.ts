@@ -70,8 +70,11 @@ export class NoticeService {
     }
   }
 
-// Helper function to generate notice number
-  private generateNoticeNumber(latestNotice: Notice | null, currentYear: number): string {
+  // Helper function to generate notice number
+  private generateNoticeNumber(
+    latestNotice: Notice | null,
+    currentYear: number,
+  ): string {
     if (!latestNotice) {
       return `1/${currentYear}`;
     }
@@ -84,8 +87,12 @@ export class NoticeService {
     }
   }
 
-// Helper function to create a notice
-  private async createNotice(createNoticeDto: CreateNoticeDto, noticeNo: string, bill: Bill): Promise<Notice> {
+  // Helper function to create a notice
+  private async createNotice(
+    createNoticeDto: CreateNoticeDto,
+    noticeNo: string,
+    bill: Bill,
+  ): Promise<Notice> {
     const newNotice = this.noticeRepository.create({
       ...createNoticeDto, // Spread the DTO data
       noticeNo, // Add the generated notice number
@@ -95,10 +102,13 @@ export class NoticeService {
     return await this.noticeRepository.save(newNotice);
   }
 
-// Helper function to create bill and notice
-  private async createBillAndNotice(createNoticeDto: CreateNoticeDto, noticeNo: string): Promise<Notice> {
+  // Helper function to create bill and notice
+  private async createBillAndNotice(
+    createNoticeDto: CreateNoticeDto,
+    noticeNo: string,
+  ): Promise<Notice> {
     const fee = await this.feeRepository.findOne({
-      where: {type: "NOTICE" },
+      where: { type: 'NOTICE' },
       relations: ['gfs'],
     });
     // Step 1: Create the bill
@@ -118,7 +128,7 @@ export class NoticeService {
     return this.createNotice(createNoticeDto, noticeNo, bill);
   }
 
-// Helper function to create a bill
+  // Helper function to create a bill
   private async createBill(noticeNo: string, createNoticeDto: CreateNoticeDto, fee:Fee): Promise<Bill> {
     const bill = new Bill();
     bill.billedAmount = fee.amount;
@@ -138,9 +148,7 @@ export class NoticeService {
 
 
     const uuid = uuidv4(); // Full UUID
-    bill.billId =    uuid.split('-')[0];
-
-
+    bill.billId = uuid.split('-')[0];
 
     // Set expiry date (14 days from today)
     const expiryDate = new Date();
@@ -166,16 +174,16 @@ export class NoticeService {
       relations: ['bill'],
       order: {
         createdAt: "DESC"
-      }// This tells TypeORM to also fetch the associated 'bill'
+      }, // This tells TypeORM to also fetch the associated 'bill'
     });
   }
 
   findOne(id: number) {
-   return this.noticeRepository.findOne({where: {id}});
+    return this.noticeRepository.findOne({ where: { id } });
   }
 
-  findByNoticeNo(noticeNo:string){
-    return this.noticeRepository.findOne({where: {noticeNo: noticeNo}});
+  findByNoticeNo(noticeNo: string) {
+    return this.noticeRepository.findOne({ where: { noticeNo: noticeNo } });
   }
 
 
@@ -197,7 +205,7 @@ export class NoticeService {
     notice.listApplication = createNoticeDto.listApplication;
     notice.appealAgaints = createNoticeDto.appealAgaints;
     notice.noticeType = createNoticeDto.noticeType;
-   return this.noticeRepository.save(notice);
+    return this.noticeRepository.save(notice);
   }
   async remove(id: number) {
     const notice = await this.findOne(id);
@@ -217,7 +225,7 @@ export class NoticeService {
     noticeHigh.listOfAppeals = [];
     for (const appealNo of notice.listOfAppeals) {
       const appeal = await this.appealRepository.findOne({
-        where: {  id: Number(appealNo) }
+        where: { id: Number(appealNo) },
       });
 
       noticeHigh.listOfAppeals.push(appeal);
@@ -227,11 +235,10 @@ export class NoticeService {
     const savedNotice =  await this.noticeHighCourtRepository.save(noticeHigh);
 
 
-    if (notice.appellantType === "2") {
-
+    if (notice.appellantType === '2') {
       const fee = await this.feeRepository.findOne({
-        where: {type: "NOTICEHIGH" },
-        relations: ['gfs'],
+        where: { type: 'NOTICEHIGH' },
+        relations: ['gfs', 'bill'],
       });
 
       const bill = new Bill();
@@ -240,20 +247,18 @@ export class NoticeService {
       bill.generatedDate = new Date();
       bill.appType = 'NOTICEHIGH';
       bill.billDescription = `Bill For Notice of Appeals High Court For`;
-      bill.billReference = noticeHigh.id+  noticeHigh.appellantName;
+      bill.billReference = noticeHigh.id + noticeHigh.appellantName;
       bill.billControlNumber = '0';
       bill.billPayed = false;
       bill.billEquivalentAmount = fee.amount;
       bill.miscellaneousAmount = 0;
-      bill.payerPhone =   noticeHigh.appellantPhone
+      bill.payerPhone = noticeHigh.appellantPhone;
       bill.payerName = noticeHigh.appellantName
-      bill.payerEmail = "trat@register.go.tz";
-      bill.billPayType = "1";
+      bill.payerEmail = 'trat@register.go.tz';
+      bill.billPayType = '1';
 
       const uuid = uuidv4(); // Full UUID
-      bill.billId =    uuid.split('-')[0];
-
-
+      bill.billId = uuid.split('-')[0];
 
       // Set expiry date (14 days from today)
       const expiryDate = new Date();
@@ -274,8 +279,13 @@ export class NoticeService {
 
       const savedBill = await this.billRepository.save(bill);
 
-
-      await createBillItem(bill, 'fee for notice to highcourt ', this.billItemRepository, fee, "NOTICEHIGH");
+      await createBillItem(
+        bill,
+        'fee for notice to highcourt ',
+        this.billItemRepository,
+        fee,
+        'NOTICEHIGH',
+      );
 
       // Step 3: Send bill to GEPG and create notice if successful
       const isBillSent = await sendBill(savedBill, this.billItemRepository);
@@ -285,16 +295,14 @@ export class NoticeService {
 
       return noticeHigh;
     }
-
   }
-
 
   async findAllNoticeHigh(){
     return await this.noticeHighCourtRepository.find({
       relations: ['bill'],
       order: {
-        createdAt: "DESC"
-      }//
+        createdAt: 'DESC',
+      }, //
     });
   }
 }

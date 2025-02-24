@@ -1,26 +1,28 @@
-import { Column, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToOne } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  JoinTable,
+  ManyToMany,
+  ManyToOne,
+} from 'typeorm';
 import { Bill } from '../../../payment/bill/entities/bill.entity';
 import { Appeal } from '../../appeals/entities/appeal.entity';
 import { BaseEntity } from '../../../utils/base.entity';
 
-
-
 @Entity()
 export class NoticeHighCourt extends BaseEntity {
+  @Column()
+  appellantType: string;
 
   @Column()
-  appellantType:string;
+  appellantName: string;
 
   @Column()
-  appellantName:string;
-
-
-  @Column()
-  appellantPhone:string;
+  appellantPhone: string;
 
   @Column()
-  respondentName:string;
-
+  respondentName: string;
 
   @ManyToOne(() => Bill, { nullable: true })
   @JoinColumn({ name: 'billId', referencedColumnName: 'id' })
@@ -29,5 +31,4 @@ export class NoticeHighCourt extends BaseEntity {
   @ManyToMany(() => Appeal)
   @JoinTable()
   listOfAppeals: Appeal[];
-
 }
