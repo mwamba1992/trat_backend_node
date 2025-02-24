@@ -115,7 +115,13 @@ export class NoticeService {
     const bill = await this.createBill(noticeNo, createNoticeDto, fee);
 
     // Step 2: Create the bill item
-    await createBillItem(bill, 'fee for notice '+ noticeNo, this.billItemRepository, fee, "NOTICE");
+    await createBillItem(
+      bill,
+      'fee for notice ' + noticeNo,
+      this.billItemRepository,
+      fee,
+      'NOTICE',
+    );
 
     // Step 3: Send bill to GEPG and create notice if successful
     const isBillSent = await sendBill(bill, this.billItemRepository);
@@ -123,13 +129,16 @@ export class NoticeService {
       throw new Error('Failed to send bill to GEPG');
     }
 
-
     // Step 4: Create and save the notice
     return this.createNotice(createNoticeDto, noticeNo, bill);
   }
 
   // Helper function to create a bill
-  private async createBill(noticeNo: string, createNoticeDto: CreateNoticeDto, fee:Fee): Promise<Bill> {
+  private async createBill(
+    noticeNo: string,
+    createNoticeDto: CreateNoticeDto,
+    fee: Fee,
+  ): Promise<Bill> {
     const bill = new Bill();
     bill.billedAmount = fee.amount;
     bill.status = 'PENDING';
@@ -141,11 +150,10 @@ export class NoticeService {
     bill.billPayed = false;
     bill.billEquivalentAmount = fee.amount;
     bill.miscellaneousAmount = 0;
-    bill.payerPhone =  createNoticeDto.appellantPhone
-    bill.payerName = createNoticeDto.appellantFullName
-    bill.payerEmail = "trat@register.go.tz";
-    bill.billPayType = "1";
-
+    bill.payerPhone = createNoticeDto.appellantPhone;
+    bill.payerName = createNoticeDto.appellantFullName;
+    bill.payerEmail = 'trat@register.go.tz';
+    bill.billPayType = '1';
 
     const uuid = uuidv4(); // Full UUID
     bill.billId = uuid.split('-')[0];
@@ -173,7 +181,7 @@ export class NoticeService {
     return await this.noticeRepository.find({
       relations: ['bill'],
       order: {
-        createdAt: "DESC"
+        createdAt: 'DESC',
       }, // This tells TypeORM to also fetch the associated 'bill'
     });
   }
@@ -185,7 +193,6 @@ export class NoticeService {
   findByNoticeNo(noticeNo: string) {
     return this.noticeRepository.findOne({ where: { noticeNo: noticeNo } });
   }
-
 
   save(notice: Notice) {
     return this.noticeRepository.save(notice);
@@ -216,7 +223,7 @@ export class NoticeService {
   }
 
   async saveHighCourtNotice(notice: CreateNoticeHigh) {
-    console.log(notice)
+    console.log(notice);
     const noticeHigh = new NoticeHighCourt();
     noticeHigh.appellantName = notice.appellantName;
     noticeHigh.appellantType = notice.appellantType;
@@ -232,13 +239,12 @@ export class NoticeService {
     }
 
 
-    const savedNotice =  await this.noticeHighCourtRepository.save(noticeHigh);
-
+    const savedNotice = await this.noticeHighCourtRepository.save(noticeHigh);
 
     if (notice.appellantType === '2') {
       const fee = await this.feeRepository.findOne({
         where: { type: 'NOTICEHIGH' },
-        relations: ['gfs', 'bill'],
+        relations: ['gfs'],
       });
 
       const bill = new Bill();
@@ -276,7 +282,6 @@ export class NoticeService {
       bill.approvedBy = 'SYSTEM';
       bill.financialYear = '2024/2025';
 
-
       const savedBill = await this.billRepository.save(bill);
 
       await createBillItem(
@@ -293,11 +298,13 @@ export class NoticeService {
         throw new Error('Failed to send bill to GEPG');
       }
 
+      noticeHigh.bill = savedBill;
+      await this.noticeHighCourtRepository.save(noticeHigh);
       return noticeHigh;
     }
   }
 
-  async findAllNoticeHigh(){
+  async findAllNoticeHigh() {
     return await this.noticeHighCourtRepository.find({
       relations: ['bill'],
       order: {
@@ -306,4 +313,3 @@ export class NoticeService {
     });
   }
 }
-

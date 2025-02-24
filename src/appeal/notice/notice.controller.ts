@@ -1,17 +1,26 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { NoticeService } from './notice.service';
 import { CreateNoticeDto } from './dto/create-notice.dto';
 import { Notice } from './entities/notice.entity';
 import { formatDate } from '../../utils/helper.utils';
 import { BillService } from '../../payment/bill/bill.service';
 import { AuthGuard } from '../../auth/auth.guard';
-import { CreateNoticeHigh } from './dto/create-notice-high';
 
 @Controller('notices')
 export class NoticeController {
-  constructor(private readonly noticeService: NoticeService,
-              private readonly billService: BillService,) {
-  }
+  constructor(
+    private readonly noticeService: NoticeService,
+    private readonly billService: BillService,
+  ) {}
 
   @Post()
   @UseGuards(AuthGuard)
@@ -43,15 +52,13 @@ export class NoticeController {
     return this.noticeService.remove(+id);
   }
 
-  @Post("/import")
+  @Post('/import')
   @UseGuards(AuthGuard)
   importNotice() {
-    console.log("Importing notices from CSV file");
+    console.log('Importing notices from CSV file');
 
     const csv = require('csv-parser')
     const fs = require('fs')
-    const results = [];
-
     fs.createReadStream('/Users/amtz/gepg/new_gepg/nest/notice_edited.csv')
       .pipe(csv())
       .on('data', async (row) => {
@@ -64,9 +71,9 @@ export class NoticeController {
 
         console.log(row.billId);
 
-        if(row.bill) {
+        if (row.bill) {
           notice.bill = await this.billService.findByBillId(row.bill);
-        }else{
+        } else {
           notice.bill = null;
         }
         notice.financialYear = row.financialYear;
@@ -76,8 +83,8 @@ export class NoticeController {
 
 
         if(await this.noticeService.findByNoticeNo(notice.noticeNo) === null){
-       await this.noticeService.save(notice);
-       console.log("Notice saved" + notice.noticeNo);
+          await this.noticeService.save(notice);
+          console.log('Notice saved' + notice.noticeNo);
         }
 
 

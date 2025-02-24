@@ -5,11 +5,10 @@ import { CreateNoticeHigh } from './dto/create-notice-high';
 
 @Controller('notices-high')
 export class NoticeHighController {
-
-  constructor(private readonly noticeService: NoticeService,
-              private readonly billService: BillService,) {
-  }
-
+  constructor(
+    private readonly noticeService: NoticeService,
+    private readonly billService: BillService,
+  ) {}
 
   @Get()
   findAll() {
@@ -19,6 +18,5 @@ export class NoticeHighController {
   @Post()
   create(@Body() createNoticeHigh: CreateNoticeHigh) {
     return this.noticeService.saveHighCourtNotice(createNoticeHigh);
-
   }
 }
