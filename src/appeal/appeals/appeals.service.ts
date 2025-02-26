@@ -94,7 +94,9 @@ export class AppealsService {
 
     appeal.createdBy = this.userContextService.getUser().username;
     appeal.updatedBy = this.userContextService.getUser().username;
-    appeal.dateOfFilling = createAppealDto.dateOfFilling;
+    const dateOfFilling = new Date(createAppealDto.dateOfFilling);
+    dateOfFilling.setDate(dateOfFilling.getDate() + 1);
+    appeal.dateOfFilling = dateOfFilling;
     appeal.assNo = createAppealDto.assNo;
     appeal.natureOfRequest = createAppealDto.natureOfRequest;
     appeal.bankNo = createAppealDto.bankNo;

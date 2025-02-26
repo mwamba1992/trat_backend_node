@@ -5,7 +5,6 @@ import { Appeal } from '../entities/appeal.entity';
 import { ApplicationRegister } from '../../application-register/entities/application-register.entity';
 
 export class CreateSummonsDto {
-
   @IsDate()
   startDate: Date;
 

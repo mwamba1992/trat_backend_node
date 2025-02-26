@@ -41,8 +41,18 @@ export class SummonsService {
     summons: Summons,
     createSummonsDto: CreateSummonsDto,
   ): Promise<Summons> {
-    summons.startDate = createSummonsDto.startDate;
-    summons.endDate = createSummonsDto.endDate;
+    // Get the startDate and endDate from the DTO
+    const startDate = new Date(createSummonsDto.startDate);
+    const endDate = new Date(createSummonsDto.endDate);
+
+    // Add one day to startDate
+    startDate.setDate(startDate.getDate() + 1); // Adds one day to the startDate
+
+    // Add one day to endDate
+    endDate.setDate(endDate.getDate() + 1); // Adds one day to the endDate
+
+    summons.startDate = startDate;
+    summons.endDate = endDate;
     summons.status = createSummonsDto.status;
     summons.remarks = createSummonsDto.remarks;
     summons.venue = createSummonsDto.venue;
@@ -67,12 +77,10 @@ export class SummonsService {
   // Create a new summons
   async create(createSummonsDto: CreateSummonsDto): Promise<Summons> {
     console.log(createSummonsDto);
-
     const summons = new Summons();
 
     // Use the helper method to set properties
     await this.setSummonsProperties(summons, createSummonsDto);
-
     const saveDSummon = this.summonsRepository.create(summons);
     return await this.summonsRepository.save(summons);
   }

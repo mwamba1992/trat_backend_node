@@ -1,4 +1,11 @@
-import { IsArray, IsBoolean, IsOptional, IsPhoneNumber, IsString, Length } from 'class-validator';
+import {
+  IsArray,
+  IsBoolean,
+  IsOptional,
+  IsPhoneNumber,
+  IsString,
+  Length,
+} from 'class-validator';
 
 export class CreateNoticeDto {
 
@@ -15,16 +22,15 @@ export class CreateNoticeDto {
   respondentFullName: string;
 
   @IsOptional()
-  @IsPhoneNumber('TZ')  // You could specify the country code if required
+  @IsPhoneNumber('TZ') // You could specify the country code if required
   appellantPhone?: string;
 
   @IsOptional()
-  @IsPhoneNumber('TZ')  // You could specify the country code if required
+  @IsPhoneNumber('TZ') // You could specify the country code if required
   respondentPhone?: string;
 
   @IsBoolean()
   filledByGovernment: boolean;
-
 
   @IsOptional()
   @IsArray()

@@ -98,7 +98,7 @@ export class AppealsController {
       .pipe(csv())
       .on('data', async (row) => {
         i++;
-        if (row.appeal_no.trim().split('/')[1] == '2023') {
+        if (row.appeal_no.trim().split('/')[1] == '2019') {
           console.log(row.appeal_no.trim());
           // const parties = [];
           // const appeal = await this.appealsService.findByAppealNo(
@@ -152,7 +152,7 @@ export class AppealsController {
                 formatDate(row.date_of_filling.trimEnd()),
               );
             } else {
-              appeal.dateOfFilling = formatDate('01/01/2023');
+              appeal.dateOfFilling = formatDate('01/01/2019');
             }
 
             console.log('formatted ' + row.date_of_filling);
@@ -164,7 +164,7 @@ export class AppealsController {
               appeal.dateOfDecision = null;
             }
             //
-            appeal.financialYear = '2022/2023';
+            appeal.financialYear = '2018/2019';
             appeal.natureOfRequest = 'nan';
             appeal.assNo = row.ass_no;
             appeal.billNo = row.bill_no;

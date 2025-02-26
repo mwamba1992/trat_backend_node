@@ -31,4 +31,5 @@ export class NoticeHighCourt extends BaseEntity {
   @ManyToMany(() => Appeal)
   @JoinTable()
   listOfAppeals: Appeal[];
+
 }

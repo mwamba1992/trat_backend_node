@@ -37,15 +37,11 @@ export class ApplicationRegisterService {
 
   async findAll(): Promise<ApplicationRegister[]> {
     return await this.applicationRepository.find({
-      relations: [
-        'appellantList',
-        'respondentList',
-        'applications',
-        'taxes'
-    ],
+      relations: ['appellantList', 'respondentList', 'applications', 'taxes'],
       order: {
-        createdAt: "DESC"
-      }});
+        createdAt: 'DESC',
+      },
+    });
   }
 
   async findOne(id: number): Promise<ApplicationRegister> {
@@ -58,12 +54,14 @@ export class ApplicationRegisterService {
         'taxes',
         'statusTrend',
         'billId',
-        'applicationType'
+        'applicationType',
       ],
     });
   }
 
-  async create(createApplicationRegisterDto: CreateApplicationRegisterDto): Promise<ApplicationRegister> {
+  async create(
+    createApplicationRegisterDto: CreateApplicationRegisterDto,
+  ): Promise<ApplicationRegister> {
     console.log(createApplicationRegisterDto);
 
     // Initialize the application object
@@ -80,43 +78,55 @@ export class ApplicationRegisterService {
     // Fetch region details from the repository
     const region = await this.fetchRegion(createApplicationRegisterDto.region);
 
-
-
-    let  applications: ApplicationRegister[] = [];
-
+    const applications: ApplicationRegister[] = [];
 
     // Process respondents
     for (const applicationsMap of createApplicationRegisterDto.applicationss) {
-      let  applicationMap = JSON.parse( JSON.stringify(applicationsMap));
+      const applicationMap = JSON.parse(JSON.stringify(applicationsMap));
       const dbApplication = await this.applicationRepository.findOne({
         where: { id: applicationMap.id },
       });
       if (dbApplication) applications.push(dbApplication);
     }
 
-    application.applications = applications
+    application.applications = applications;
 
     application.taxes = tax;
     application.natureOfRequest = createApplicationRegisterDto.natureOfRequest;
-    application.dateOfFilling = new Date(createApplicationRegisterDto.dateOfFilling);
+
+    const dateOfFilling = new Date(createApplicationRegisterDto.dateOfFilling);
+    dateOfFilling.setDate(dateOfFilling.getDate() + 1);
+    application.dateOfFilling = dateOfFilling;
     application.createdBy = this.userContextService.getUser().username;
     application.statusTrend = statusTrend;
 
     // Generate application number based on the latest application and region
     const latestApplication = await this.findTopApplicationById();
     const currentYear = new Date().getFullYear();
-    application.applicationNo = this.generateApplicationNumber(latestApplication, currentYear, region);
+    application.applicationNo = this.generateApplicationNumber(
+      latestApplication,
+      currentYear,
+      region,
+    );
 
     // Process appellants and respondents
-    const { applicants, respondents } = await processParties(createApplicationRegisterDto, this.partyRepository);
+    const { applicants, respondents } = await processParties(
+      createApplicationRegisterDto,
+      this.partyRepository,
+    );
 
     // Assign the parties to the application
     application.appellantList = applicants;
     application.respondentList = respondents;
 
     // Handle application type-specific logic (Bill creation if type is '1')
-    if (createApplicationRegisterDto.applicationType === "2") {
-      await this.handleBillCreation(createApplicationRegisterDto, applicants, respondents, application.applicationNo);
+    if (createApplicationRegisterDto.applicationType === '2') {
+      await this.handleBillCreation(
+        createApplicationRegisterDto,
+        applicants,
+        respondents,
+        application.applicationNo,
+      );
       return await this.applicationRepository.save(application);
     } else {
       // Save the application if no bill is required
@@ -124,43 +134,57 @@ export class ApplicationRegisterService {
     }
   }
 
-// Helper function to fetch tax data
+  // Helper function to fetch tax data
   private async fetchTax(taxId: number) {
     return await this.CommonSetupRepository.findOne({
       where: { id: taxId },
     });
   }
 
-// Helper function to fetch status trend (status type 'applicationStatus' and 'NEW')
+  // Helper function to fetch status trend (status type 'applicationStatus' and 'NEW')
   private async fetchStatusTrend(statusName: string) {
     return await this.CommonSetupRepository.findOne({
       where: { setupType: 'applicationStatus', name: statusName },
     });
   }
 
-// Helper function to fetch region data
+  // Helper function to fetch region data
   private async fetchRegion(regionId: number) {
     return await this.CommonSetupRepository.findOne({
       where: { setupType: 'region', id: regionId },
     });
   }
 
-
-// Helper function to handle bill creation
-  private async handleBillCreation(createApplicationRegisterDto: CreateApplicationRegisterDto, applicants: Party[], respondents: Party[], applicationNo: string) {
+  // Helper function to handle bill creation
+  private async handleBillCreation(
+    createApplicationRegisterDto: CreateApplicationRegisterDto,
+    applicants: Party[],
+    respondents: Party[],
+    applicationNo: string,
+  ) {
     // Step 1: Create the bill
 
     const fee = await this.feeRepository.findOne({
-      where: { type: "APPLICATION" },
+      where: { type: 'APPLICATION' },
       relations: ['gfs'],
     });
 
-
-    const bill = await this.createBill(createApplicationRegisterDto, respondents, applicants, applicationNo, fee);
-
+    const bill = await this.createBill(
+      createApplicationRegisterDto,
+      respondents,
+      applicants,
+      applicationNo,
+      fee,
+    );
 
     // Step 2: Create the bill item
-    await createBillItem(bill, "fee for "+ applicationNo, this.billItemRepository, fee, "APPLICATION");
+    await createBillItem(
+      bill,
+      'fee for ' + applicationNo,
+      this.billItemRepository,
+      fee,
+      'APPLICATION',
+    );
 
     // Step 3: Send bill to GEPG and create notice if successful
     const isBillSent = await sendBill(bill, this.billItemRepository);
@@ -169,10 +193,13 @@ export class ApplicationRegisterService {
     }
   }
 
-
-  async update(id: number,  createApplicationDto: Partial<CreateApplicationRegisterDto>): Promise<ApplicationRegister> {
-
-    const  application = await this.applicationRepository.findOne({where: {id}});
+  async update(
+    id: number,
+    createApplicationDto: Partial<CreateApplicationRegisterDto>,
+  ): Promise<ApplicationRegister> {
+    const application = await this.applicationRepository.findOne({
+      where: { id },
+    });
     if (!application) {
       throw new Error('Application not found');
     }
@@ -184,33 +211,40 @@ export class ApplicationRegisterService {
     await this.applicationRepository.delete(id);
   }
 
-
   // Method to find the top (latest) notice by the highest ID
   async findTopApplicationById(): Promise<ApplicationRegister> {
     return this.applicationRepository
       .createQueryBuilder('application_register')
-      .orderBy('application_register.id', 'DESC')  // Sort by 'noticeId' in descending order
+      .orderBy('application_register.id', 'DESC') // Sort by 'noticeId' in descending order
       .limit(1) // Only return the first (top) result
       .getOne();
   }
 
-
-  private generateApplicationNumber(latestApplication: ApplicationRegister | null, currentYear: number, region:CommonSetup): string {
+  private generateApplicationNumber(
+    latestApplication: ApplicationRegister | null,
+    currentYear: number,
+    region: CommonSetup,
+  ): string {
     if (!latestApplication) {
       return `${region.name}.1/${currentYear}`;
     }
 
-    const [currentApplicationNo , year] = latestApplication.applicationNo.split('/');
+    const [currentApplicationNo, year] =
+      latestApplication.applicationNo.split('/');
     if (parseInt(year, 10) === currentYear) {
-      return `${region.name}.${parseInt(currentApplicationNo.split(".")[1], 10) + 1}/${currentYear}`;
+      return `${region.name}.${parseInt(currentApplicationNo.split('.')[1], 10) + 1}/${currentYear}`;
     } else {
       return `${region.name}.1/${currentYear}`;
     }
   }
 
-
-  async createBill(createApplicationRegisterDto: CreateApplicationRegisterDto,
-                   respondents: Party[], applicants: Party[], applicationNo: string,fee: Fee) {
+  async createBill(
+    createApplicationRegisterDto: CreateApplicationRegisterDto,
+    respondents: Party[],
+    applicants: Party[],
+    applicationNo: string,
+    fee: Fee,
+  ) {
     const bill = new Bill();
     bill.billedAmount = fee.amount;
     bill.status = 'PENDING';
@@ -223,14 +257,13 @@ export class ApplicationRegisterService {
     bill.billEquivalentAmount = fee.amount;
     bill.miscellaneousAmount = 0;
     bill.payerPhone = applicants[0].phone_number;
-    bill.payerName = applicants.map(applicant => applicant.name).join(' ');
-    bill.payerEmail =  Constants.REGISTER_EMAIL;
-    bill.billPayType =  Constants.FULL_BILL_PAY_TYPE;
-    bill.currency = "TZS"
+    bill.payerName = applicants.map((applicant) => applicant.name).join(' ');
+    bill.payerEmail = Constants.REGISTER_EMAIL;
+    bill.billPayType = Constants.FULL_BILL_PAY_TYPE;
+    bill.currency = 'TZS';
 
     const uuid = uuidv4(); // Full UUID
     bill.billId = uuid.split('-')[0];
-
 
     // Set expiry date (14 days from today)
     const expiryDate = new Date();
@@ -249,7 +282,5 @@ export class ApplicationRegisterService {
     bill.financialYear = '2024/2025';
 
     return await this.billRepository.save(bill);
-
-
   }
 }

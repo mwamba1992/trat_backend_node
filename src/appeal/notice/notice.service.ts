@@ -34,22 +34,17 @@ export class NoticeService {
     private readonly appealRepository: Repository<Appeal>,
   ) {}
 
-
   // Method to find the top (latest) notice by the highest ID
   async findTopNoticeById(): Promise<Notice> {
     return this.noticeRepository
       .createQueryBuilder('notice')
-      .orderBy('notice.id', 'DESC')  // Sort by 'noticeId' in descending order
+      .orderBy('notice.id', 'DESC') // Sort by 'noticeId' in descending order
       .limit(1) // Only return the first (top) result
       .getOne();
   }
 
-
-
   // Method to create a new Notice
   async create(createNoticeDto: CreateNoticeDto): Promise<Notice> {
-
-
     console.log(createNoticeDto);
     // Find the top (latest) notice by ID
     const latestNotice = await this.findTopNoticeById();
@@ -61,11 +56,9 @@ export class NoticeService {
 
     if (createNoticeDto.noticeType === '1') {
       return this.createNotice(createNoticeDto, noticeNo, null);
-    }
-    else if (createNoticeDto.noticeType === '2') {
+    } else if (createNoticeDto.noticeType === '2') {
       return this.createBillAndNotice(createNoticeDto, noticeNo);
-    }
-    else {
+    } else {
       throw new Error('Invalid notice type');
     }
   }
@@ -237,10 +230,7 @@ export class NoticeService {
 
       noticeHigh.listOfAppeals.push(appeal);
     }
-
-
-    const savedNotice = await this.noticeHighCourtRepository.save(noticeHigh);
-
+    await this.noticeHighCourtRepository.save(noticeHigh);
     if (notice.appellantType === '2') {
       const fee = await this.feeRepository.findOne({
         where: { type: 'NOTICEHIGH' },
