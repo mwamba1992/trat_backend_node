@@ -18,8 +18,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
     @InjectRepository(Role)
     private readonly roleRepository: Repository<Role>,
-  ) {
-  }
+  ) {}
 
   async signIn(
     username: string,
@@ -42,7 +41,7 @@ export class AuthService {
 
     const payload = {
       sub: user.id,
-      username: user.username,
+      username: user.name,
       permissions,
     };
 
