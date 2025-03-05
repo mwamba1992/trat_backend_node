@@ -11,7 +11,7 @@ import { User } from '../../auth/user/entities/user.entity';
 import { Constants } from '../../utils/constants';
 import { createBillItem, sendBill } from '../../utils/middle.gepg';
 import { BillItem } from '../../payment/bill-item/entities/bill-item.entity';
-import { processParties } from '../../utils/helper.utils';
+import { isValidaPhone, processParties } from "../../utils/helper.utils";
 import { Fee } from '../../settings/fees/entities/fee.entity';
 import { UserContextService } from '../../auth/user/dto/user.context';
 
@@ -245,6 +245,10 @@ export class ApplicationRegisterService {
     applicationNo: string,
     fee: Fee,
   ) {
+    if (!isValidaPhone(applicants[0].phone_number)) {
+      throw new Error('Invalid phone number');
+    }
+
     const bill = new Bill();
     bill.billedAmount = fee.amount;
     bill.status = 'PENDING';

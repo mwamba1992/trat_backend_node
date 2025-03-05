@@ -10,7 +10,6 @@ import { Role } from './auth/role/entities/role.entity';
 import { PaymentModule } from './payment/payment.module';
 import { Notice } from './appeal/notice/entities/notice.entity';
 import { Bill } from './payment/bill/entities/bill.entity';
-import { BillItemController } from './payment/bill-item/bill-item.controller';
 import { BillItem } from './payment/bill-item/entities/bill-item.entity';
 import { SettingsModule } from './settings/settings.module';
 import { CommonSetup } from './settings/common-setup/entities/common-setup.entity';

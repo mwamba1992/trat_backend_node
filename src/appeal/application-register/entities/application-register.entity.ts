@@ -32,13 +32,13 @@ export class ApplicationRegister extends BaseEntity{
   @Column()
   natureOfRequest: string;
 
-  @Column( { nullable: true })
+  @Column({ nullable: true })
   personnelResponsibleFor: string;
 
-  @Column({nullable: true})
+  @Column({ nullable: true })
   decideBy: string;
 
-  @Column({nullable : true})
+  @Column({ nullable: true })
   remarks: string;
 
 
@@ -49,7 +49,6 @@ export class ApplicationRegister extends BaseEntity{
   @ManyToMany(() => Party)
   @JoinTable()
   respondentList: Party[];
-
 
   @ManyToOne(() => CommonSetup, (taxType) => taxType.id, { nullable: false })
   @JoinColumn({ name: 'taxId' })

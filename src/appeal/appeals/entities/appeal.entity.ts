@@ -103,7 +103,7 @@ export class Appeal extends BaseEntity {
   appealAmount: AppealAmount[];
 
   @Column({
-    type: "enum",
+    type: 'enum',
     enum: ProgressStatus,
     default: ProgressStatus.PENDING, // Default value
   })
