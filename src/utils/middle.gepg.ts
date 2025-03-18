@@ -103,40 +103,60 @@ export async function sendBill(
 export async function generatePaymentAck(): Promise<string> {
   // Create the data structure for the response
   const ackData = {
-    Gepg: {
-      gepgPmtSpInfoAck: [
-        {
-          TrxStsCode: '7101', // Transaction Status Code
-        },
-      ],
-      gepgSignature: [
-        'd0EEMUCItSuadQP6zamGoW1yOKomXWtMFKEl60zXq4/xsQ1MCtBNiwUqiiZQw2jfUSCIGzsXteLpZS3wEwOHPHF6AXyir7zCv4zJ8mqEDGDcJUVooUjuLtC602RuoE2a2ER0XKhPyBd0ijxLzYMiVioWAIDg0QgzYRk3qy8Pjy1o9U7a0Ya0X2nGklVApTFYQPlLZznmbFriFvV2L0AVfpJfWjcerIcON+JiGB5x8jok2Q34g6qWiEvhdwGYd3/qRFKoYRdBw4Il8BD/Ok7JM7u+QvC4WLWNVuu0jqgJaa+/e1rFHeOBAENqE8IwMDCoiIr6yzgi4+p63VxEZD4gOQ==',
-      ],
-    },
+    gepgPmtSpInfoAck: [
+      {
+        TrxStsCode: '7101', // Transaction Status Code
+      },
+    ],
   };
 
-  // Convert the JavaScript object to XML
-  const builder = new xml2js.Builder();
-  return builder.buildObject(ackData);
+  // Initialize the XML builder with formatting options
+  const builder = new xml2js.Builder({
+    renderOpts: { pretty: false, indent: ' ', newline: '\n' },
+    xmldec: { version: '1.0', encoding: 'UTF-8' },
+  });
+
+  // Generate the XML content
+  const content = builder.buildObject(ackData);
+  const gepgPmtSpInfoAck = getStringWithinXmlTag(content, 'gepgPmtSpInfoAck');
+
+  // Create digital signature
+  const gePGGlobalSignature = new GePGGlobalSignature();
+  const signature = gePGGlobalSignature.createSignature(gepgPmtSpInfoAck);
+
+  // Construct the final XML response
+  return `<Gepg>${gepgPmtSpInfoAck}<gepgSignature>${signature}</gepgSignature></Gepg>`;
 }
 
 export async function generateBillAck(): Promise<string> {
   // Create the data structure for the response
   const ackData = {
-    Gepg: {
-      gepgBillSubRespAck: [
-        {
-          TrxStsCode: '7101', // Transaction Status Code
-        },
-      ],
-      gepgSignature: [
-        'CmUx2/7j6bgnLZX21VQXO1bQvGK8nz4XVfE07GmUqz6RPsYbSEq1iyqvUCBxKU3x4+jdlmz4AkP5Lf7+ZQa2+MIeYAytGXL1UoOB44JpqBozH8xW2OBzFPk7tMvrTU8AXYRTNlBDIrgDoW4S3lqqLOVeZD6YcwEmwHFRo26F1zc0ec/MT97Y84lO/KiWrKpC6X8Fim7QEb3vWR9hfTUyYyZQOE0LQQucY70LfswPvGeADOt/X+/vMbkI/bADcbr7QWg3DYZdt1NiHp1NMgeWa3JiqnFLY8R6kmVdPyoYvObrK/G4vEU4xIZOFFl3nwCQIHuArV+IbulHKY/LuhR9fA==',
-      ],
-    },
+    gepgBillSubRespAck: [
+      {
+        TrxStsCode: '7101', // Transaction Status Code
+      },
+    ],
   };
 
-  const builder = new xml2js.Builder();
-  return builder.buildObject(ackData);
+  // Initialize the XML builder with formatting options
+  const builder = new xml2js.Builder({
+    renderOpts: { pretty: false, indent: ' ', newline: '\n' },
+    xmldec: { version: '1.0', encoding: 'UTF-8' },
+  });
+
+  // Generate the XML content
+  const content = builder.buildObject(ackData);
+  const gepgBillSubRespAck = getStringWithinXmlTag(
+    content,
+    'gepgBillSubRespAck',
+  );
+
+  // Create digital signature
+  const gePGGlobalSignature = new GePGGlobalSignature();
+  const signature = gePGGlobalSignature.createSignature(gepgBillSubRespAck);
+
+  // Construct the final XML response
+  return `<Gepg>${gepgBillSubRespAck}<gepgSignature>${signature}</gepgSignature></Gepg>`;
 }
 
 function getStringWithinXmlTag(xmlBody, xmlTag) {
