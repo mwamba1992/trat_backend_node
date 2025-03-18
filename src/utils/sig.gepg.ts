@@ -15,17 +15,15 @@ export class GePGGlobalSignature {
 
 
   createSignature(content: string) {
-
-
-
-
-
     // Read the PFX file (binary data)
     const pfxBuffer = fs.readFileSync('/opt/tomcat/keys/trabPrivate.pfx');
 
     try {
       // Parse the PFX file (PKCS#12 format)
-      const p12 = forge.pkcs12.pkcs12FromAsn1(forge.asn1.fromDer(pfxBuffer.toString('binary')), 'passpass');
+      const p12 = forge.pkcs12.pkcs12FromAsn1(
+        forge.asn1.fromDer(pfxBuffer.toString('binary')),
+        'passpass',
+      );
 
       // Extract the private key from the PFX
       const bags = p12.getBags({ bagType: forge.pki.oids.pkcs8ShroudedKeyBag });
@@ -46,7 +44,9 @@ export class GePGGlobalSignature {
       return forge.util.encode64(signature);
     } catch (error) {
       console.error('Error parsing PFX file:', error);
-      throw new Error('Failed to extract private key from PFX file or invalid password');
+      throw new Error(
+        'Failed to extract private key from PFX file or invalid password',
+      );
     }
   }
 

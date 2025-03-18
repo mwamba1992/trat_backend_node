@@ -9,24 +9,22 @@ import { v4 as uuidv4 } from 'uuid';
 import { User } from '../../auth/user/entities/user.entity';
 import { BillItem } from '../bill-item/entities/bill-item.entity';
 import { Fee } from '../../settings/fees/entities/fee.entity';
-import { sendBill } from '../../utils/middle.gepg';
+import { generateBillAck, sendBill } from '../../utils/middle.gepg';
 import { UserContextService } from '../../auth/user/dto/user.context';
 
 
 @Injectable()
 export class BillService {
-
-
   constructor(
     @InjectRepository(Bill)
-    private readonly  billRepository: Repository<Bill>,
+    private readonly billRepository: Repository<Bill>,
     @InjectRepository(User)
-    private readonly  userRepository: Repository<User>,
+    private readonly userRepository: Repository<User>,
     @InjectRepository(BillItem)
-    private readonly  billItemRepository: Repository<BillItem>,
+    private readonly billItemRepository: Repository<BillItem>,
     @InjectRepository(Fee)
-    private readonly  feeRepository: Repository<Fee>,
-    private readonly userContextService: UserContextService
+    private readonly feeRepository: Repository<Fee>,
+    private readonly userContextService: UserContextService,
   ) {}
 
 
@@ -146,7 +144,7 @@ export class BillService {
 
     await this.billRepository.save(bill);
 
-    return '';
+    return generateBillAck();
   }
 
   saveBill(bill: Bill) {

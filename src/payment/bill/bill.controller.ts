@@ -2,16 +2,13 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@n
 import { BillService } from './bill.service';
 import { UpdateBillDto } from './dto/update-bill.dto';
 import { BillCreateDTO } from './dto/create-bill.dto';
-import csvParser from 'csv-parser';
-import * as fs from 'fs';
 import { Bill } from './entities/bill.entity';
 import { formatDate } from '../../utils/helper.utils';
 import { AuthGuard } from '../../auth/auth.guard';
 
 @Controller('bills')
 export class BillController {
-  constructor(
-    private readonly billService: BillService) {}
+  constructor(private readonly billService: BillService) {}
 
   @Post()
   @UseGuards(AuthGuard)
@@ -49,7 +46,7 @@ export class BillController {
 
   @Post("/import")
   importBill() {
-    console.log("Importing bills from CSV file");
+    console.log('Importing bills from CSV file');
 
     const csv = require('csv-parser')
     const fs = require('fs')
