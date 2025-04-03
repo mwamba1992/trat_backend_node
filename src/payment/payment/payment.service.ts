@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { parseStringPromise } from 'xml2js';
 import { Payment } from './entities/payment.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -102,5 +102,27 @@ export class PaymentService {
     console.log(queryBuilder.getQuery());
     // Execute the query and return filtered results
     return await queryBuilder.getMany();
+  }
+
+  async verifyHighCourtPayment(controlNumber: string) {
+    const payment = await this.paymentRepository.findOne({
+      where: { controlNumber: controlNumber },
+    });
+
+    if (payment) {
+      return {
+        statusCode: HttpStatus.OK,
+        message: 'Payment found',
+        data: payment,
+      };
+    }
+
+    throw new HttpException(
+      {
+        statusCode: HttpStatus.NOT_FOUND,
+        message: 'Payment not found',
+      },
+      HttpStatus.NOT_FOUND,
+    );
   }
 }

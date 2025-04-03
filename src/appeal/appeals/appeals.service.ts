@@ -1,8 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Between, LessThan, MoreThanOrEqual, Not, Repository } from 'typeorm';
+import { Between, Not, Repository } from 'typeorm';
 import { CreateAppealDto } from './dto/create-appeal.dto';
-import { UpdateAppealDto } from './dto/update-appeal.dto';
 import { Appeal } from './entities/appeal.entity';
 import { CommonSetup } from '../../settings/common-setup/entities/common-setup.entity';
 import { Notice } from '../notice/entities/notice.entity';
@@ -10,10 +9,10 @@ import { AppealAmount } from './entities/appeal.amount';
 import { Party } from '../../settings/parties/entities/party.entity';
 import {
   generateDateRanges,
-  getMonthName, isValidaPhone,
+  isValidaPhone,
   processParties,
-  TopAppellantDTO
-} from "../../utils/helper.utils";
+  TopAppellantDTO,
+} from '../../utils/helper.utils';
 import { Bill } from '../../payment/bill/entities/bill.entity';
 import { Constants } from '../../utils/constants';
 import { v4 as uuidv4 } from 'uuid';
@@ -22,7 +21,7 @@ import { createBillItem, sendBill } from '../../utils/middle.gepg';
 import { BillItem } from '../../payment/bill-item/entities/bill-item.entity';
 import { ApplicationRegister } from '../application-register/entities/application-register.entity';
 import { ProgressStatus } from './dto/appeal.status.enum';
-import { Cron, CronExpression } from '@nestjs/schedule';
+import { Cron } from '@nestjs/schedule';
 import { YearlyCases } from './entities/yearly.case';
 import { AppealFilterDto } from './dto/appeal.filter.dto';
 import { Fee } from '../../settings/fees/entities/fee.entity';
@@ -148,7 +147,7 @@ export class AppealsService {
     );
 
     if (notice.noticeType === '2') {
-      await this.handleBillCreation(
+      appeal.billId = await this.handleBillCreation(
         createAppealDto,
         applicants,
         respondents,
@@ -312,6 +311,8 @@ export class AppealsService {
     if (!isBillSent) {
       throw new Error('Failed to send bill to GEPG');
     }
+
+    return bill;
   }
 
   async createBill(
@@ -424,14 +425,12 @@ export class AppealsService {
 
       const status = ['new', 'decided', 'pending'];
       const currentYear = new Date().getFullYear();
-      const currentMonth = new Date().getMonth() + 1;
-
-      const formatter = new Intl.DateTimeFormat('en-GB', {
+      new Date().getMonth() + 1;
+      new Intl.DateTimeFormat('en-GB', {
         year: 'numeric',
         month: '2-digit',
         day: '2-digit',
       });
-
       const dateRanges = generateDateRanges(currentYear);
 
       // Loop through status to fetch and update data
