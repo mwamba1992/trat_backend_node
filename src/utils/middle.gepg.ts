@@ -93,7 +93,7 @@ export async function sendBill(
     '</gepgSignature></Gepg>';
   console.log(gepgData);
   const response = await postData(
-    'http://10.1.1.134:80/api/bill/sigqrequest',
+    'http://154.118.230.202:80/api/bill/sigqrequest',
     gepgData,
   );
   console.log('\n' + response);
