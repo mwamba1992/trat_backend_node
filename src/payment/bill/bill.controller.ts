@@ -92,7 +92,7 @@ export class BillController {
       });
   }
 
-  @Post("/resend-bill")
+  @Post('/resend-bill')
   resendBill(@Body() resendBillDto: string) {
     return this.billService.resendBill(resendBillDto);
   }

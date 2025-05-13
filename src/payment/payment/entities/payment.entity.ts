@@ -1,12 +1,9 @@
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Bill } from '../../bill/entities/bill.entity';
-;
-
 
 @Entity()
-export class Payment  {
-
-  @PrimaryGeneratedColumn()// Using UUID for the 'id'
+export class Payment {
+  @PrimaryGeneratedColumn() // Using UUID for the 'id'
   id: number;
 
   @Column()
@@ -38,6 +35,8 @@ export class Payment  {
   accountNumber: string;
 
   @Column()
-  controlNumber: string
+  controlNumber: string;
 
+  @Column({ nullable: true })
+  pspName: string;
 }

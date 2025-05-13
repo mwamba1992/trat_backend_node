@@ -12,5 +12,6 @@ import { UserContextService } from '../../auth/user/dto/user.context';
   imports: [TypeOrmModule.forFeature([Bill, User, BillItem, Fee])],
   controllers: [BillController],
   providers: [BillService, UserContextService],
+  exports: [BillService],
 })
 export class BillModule {}

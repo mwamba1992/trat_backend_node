@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { parseStringPromise } from 'xml2js';
 import { Payment } from './entities/payment.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -6,7 +6,6 @@ import { Bill } from '../bill/entities/bill.entity';
 import { Repository } from 'typeorm';
 import { generatePaymentAck } from '../../utils/middle.gepg';
 import { PaymentSearchDto } from './dto/payment.search.dto';
-import * as assert from 'node:assert';
 
 @Injectable()
 export class PaymentService {
@@ -36,6 +35,7 @@ export class PaymentService {
     payment.gepgReference = pymtTrxInf.PayRefId[0];
     payment.controlNumber = pymtTrxInf.PayCtrNum[0];
     payment.payerPhone = pymtTrxInf.PyrCellNum[0];
+    payment.pspName = pymtTrxInf.PspName[0];
 
     // check if bill is available
     const bill = await this.billRepository.findOne({
@@ -124,5 +124,26 @@ export class PaymentService {
       },
       HttpStatus.NOT_FOUND,
     );
+  }
+
+  async findPaymentByGepgReceipt(gepg){
+    return await this.paymentRepository.findOne({
+      where: { gepgReference: gepg },
+    });
+  }
+
+  async savePayment(payment: Payment) {
+    return this.paymentRepository.save(payment);
+  }
+
+  async update(payment: Payment): Promise<any> {
+    const { id, ...updateData } = payment;
+    return this.paymentRepository.update(+id, updateData);
+  }
+
+  findBillByControlNUmber(controlNumber: string) {
+    return this.billRepository.findOne({
+      where: { billControlNumber: controlNumber },
+    });
   }
 }

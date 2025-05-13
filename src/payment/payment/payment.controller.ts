@@ -1,19 +1,19 @@
 import {
-  Controller,
-  Post,
   Body,
-  Headers,
+  Controller,
   Get,
-  UseGuards,
-  Query,
+  Headers,
   HttpException,
   HttpStatus,
+  Post,
+  Query,
+  UseGuards,
 } from '@nestjs/common';
 import { PaymentService } from './payment.service';
 import { AuthGuard } from '../../auth/auth.guard';
 import { PaymentSearchDto } from './dto/payment.search.dto';
-import { Constants } from "../../utils/constants";
-
+import { Constants } from '../../utils/constants';
+import { Payment } from './entities/payment.entity';
 
 @Controller('payment')
 export class PaymentController {
@@ -54,5 +54,45 @@ export class PaymentController {
   @Get()
   getPayments() {
     return this.paymentService.getAll();
+  }
+
+  @Post('/import')
+  importBill() {
+    console.log('Importing  payments from CSV file');
+
+    const csv = require('csv-parser');
+    const fs = require('fs');
+    fs.createReadStream('/Users/mwendavano/payment_export.csv')
+      .pipe(csv())
+      .on('data', async (row: { [x: string]: string }) => {
+        console.log(row);
+        // Map CSV rows to Bill entity
+        const payment = new Payment();
+        payment.controlNumber = row['control_number'];
+        payment.pspName = row['psp_name'];
+        payment.accountNumber = '';
+        payment.gepgReference = row['gepg_receipt'];
+        payment.transactionId = row['bank_receipt'];
+        payment.billAmount = parseFloat(row['paid_amount']);
+        payment.paidAmount = parseFloat(row['paid_amount']);
+        payment.paymentDate = new Date(row['payment_date']);
+        payment.payerName = row['payer_name'];
+        payment.bill = await this.paymentService.findBillByControlNUmber(
+          row['control_number'],
+        );
+
+        if (
+          (await this.paymentService.findPaymentByGepgReceipt(
+            payment.gepgReference,
+          )) === null
+        ) {
+          await this.paymentService.savePayment(payment);
+          console.log('#### saved ####');
+        } else {
+          await this.paymentService.update(payment);
+          console.log('##### not saved ####');
+        }
+      })
+      .on('end', () => {});
   }
 }
