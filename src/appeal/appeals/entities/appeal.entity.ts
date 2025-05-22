@@ -66,19 +66,19 @@ export class Appeal extends BaseEntity {
   @Column({type: 'text', nullable: true })
   remarks: string;
 
-  @Column({type: 'text', nullable: true })
+  @Column({ type: 'text', nullable: true })
   taxedOff: string;
 
-  @Column({type: 'text', nullable: true })
+  @Column({ type: 'text', nullable: true })
   assNo: string;
 
-  @Column({type: 'text', nullable: true })
+  @Column({ type: 'text', nullable: true })
   billNo: string;
 
-  @Column({type: 'text', nullable: true })
+  @Column({ type: 'text', nullable: true })
   bankNo: string;
 
-  @Column({type: 'text', nullable: true })
+  @Column({ type: 'text', nullable: true })
   wonBy: string;
 
   // New fields
@@ -93,7 +93,6 @@ export class Appeal extends BaseEntity {
 
   @Column({ type: 'boolean', default: false })
   isLoaded: boolean;
-
 
   @OneToMany(() => AppealAmount, (appealAmount) => appealAmount.entity, {
     cascade: true,
@@ -112,14 +111,14 @@ export class Appeal extends BaseEntity {
   @ManyToMany(() => Summons, (summons) => summons.appealList)
   summonsList: Summons[];
 
-
-  @Column({type: 'text', nullable: true, array: true} )
+  @Column({ type: 'text', nullable: true, array: true })
   trabAppeals: string[];
-
 
   @ManyToMany(() => NoticeHighCourt, (notice) => notice.listOfAppeals)
   noticesHigh: NoticeHighCourt[];
 
+  @Column({ type: 'text', array: true, nullable: true })
+  decisionFiles: string[];
 
   setDateFromString(dateString: string): void {
     const dateParts = dateString.split('/'); // Split 'DD/MM/YYYY'

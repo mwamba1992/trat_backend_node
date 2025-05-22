@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Between, Not, Repository } from 'typeorm';
 import { CreateAppealDto } from './dto/create-appeal.dto';
@@ -26,6 +26,8 @@ import { YearlyCases } from './entities/yearly.case';
 import { AppealFilterDto } from './dto/appeal.filter.dto';
 import { Fee } from '../../settings/fees/entities/fee.entity';
 import { UserContextService } from '../../auth/user/dto/user.context';
+import * as path from 'node:path';
+import * as fs from 'node:fs';
 
 @Injectable()
 export class AppealsService {
@@ -54,6 +56,9 @@ export class AppealsService {
     private readonly feeRepository: Repository<Fee>,
     private readonly userContextService: UserContextService,
   ) {}
+
+  private readonly logger = new Logger(AppealsService.name);
+  private readonly uploadPath = '/trab/files/';
 
   async create(createAppealDto: CreateAppealDto): Promise<Appeal> {
     console.log(createAppealDto);
@@ -643,5 +648,90 @@ export class AppealsService {
 
   findByAppealNo(appealNo: string) {
     return this.appealRepository.findOne({ where: { appealNo: appealNo } });
+  }
+
+  async updateDecision(
+    updateDecisionDto: any,
+    files?: Express.Multer.File[],
+  ): Promise<any> {
+    // Handle file uploads
+    let savedFileNames: string[] = [];
+    if (files && files.length > 0) {
+      savedFileNames = await this.saveFiles(files, updateDecisionDto.appealNo);
+    }
+
+    const appeal = await this.appealRepository.findOne({
+      where: { appealNo: updateDecisionDto.appealNo },
+    });
+
+    if (!appeal) {
+      throw new NotFoundException(
+        `Appeal with appealNo ${updateDecisionDto.appealNo} not found`,
+      );
+    }
+    // Update decision fields
+    if (updateDecisionDto.remarks !== undefined) {
+      appeal.remarks = updateDecisionDto.remarks;
+    }
+
+    if (updateDecisionDto.dateOfDecision) {
+      appeal.dateOfDecision = new Date(updateDecisionDto.dateOfDecision);
+    }
+
+    if (updateDecisionDto.status) {
+      appeal.statusTrend = updateDecisionDto.status;
+    }
+
+    appeal.progressStatus = ProgressStatus.DECIDED;
+    appeal.decisionFiles = savedFileNames; // Save the file names as a comma-separated string
+
+    return await this.appealRepository.save(appeal);
+  }
+
+  private async saveFiles(
+    files: Express.Multer.File[],
+    appealNo: string,
+  ): Promise<string[]> {
+    const savedFiles: string[] = [];
+
+    try {
+      for (const file of files) {
+        // Generate unique filename with timestamp and UUID
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+        const uniqueId = uuidv4().split('-')[0];
+        const fileExtension = path.extname(file.originalname);
+        const sanitizedOriginalName = file.originalname
+          .replace(/[^a-zA-Z0-9.-]/g, '_')
+          .substring(0, 50);
+
+        const filename = `${appealNo}_${timestamp}_${uniqueId}_${sanitizedOriginalName}${fileExtension}`;
+        const filepath = path.join(this.uploadPath, filename);
+
+        // Save file to disk
+        await fs.promises.writeFile(filepath, file.buffer);
+        savedFiles.push(filename);
+      }
+
+      return savedFiles;
+    } catch (error) {
+      // Clean up any files that were saved before the error
+      await this.cleanupFiles(savedFiles);
+      throw error;
+    }
+  }
+
+  private async cleanupFiles(filenames: string[]): Promise<void> {
+    for (const filename of filenames) {
+      try {
+        const filepath = path.join(this.uploadPath, filename);
+        if (fs.existsSync(filepath)) {
+          await fs.promises.unlink(filepath);
+        }
+      } catch (error) {
+        this.logger.warn(
+          `Failed to cleanup file ${filename}: ${error.message}`,
+        );
+      }
+    }
   }
 }
