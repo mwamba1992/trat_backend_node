@@ -654,15 +654,17 @@ export class AppealsService {
     updateDecisionDto: any,
     files?: Express.Multer.File[],
   ): Promise<any> {
-    // Handle file uploads
-    let savedFileNames: string[] = [];
-    if (files && files.length > 0) {
-      savedFileNames = await this.saveFiles(files, updateDecisionDto.appealNo);
-    }
+
 
     const appeal = await this.appealRepository.findOne({
       where: { appealNo: updateDecisionDto.appealNo },
     });
+
+    // Handle file uploads
+    let savedFileNames: string[] = [];
+    if (files && files.length > 0) {
+      savedFileNames = await this.saveFiles(files);
+    }
 
     if (!appeal) {
       throw new NotFoundException(
@@ -688,23 +690,17 @@ export class AppealsService {
     return await this.appealRepository.save(appeal);
   }
 
-  private async saveFiles(
-    files: Express.Multer.File[],
-    appealNo: string,
-  ): Promise<string[]> {
+  private async saveFiles(files: Express.Multer.File[]): Promise<string[]> {
     const savedFiles: string[] = [];
 
     try {
       for (const file of files) {
         // Generate unique filename with timestamp and UUID
-        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
         const uniqueId = uuidv4().split('-')[0];
         const fileExtension = path.extname(file.originalname);
-        const sanitizedOriginalName = file.originalname
-          .replace(/[^a-zA-Z0-9.-]/g, '_')
-          .substring(0, 50);
 
-        const filename = `${appealNo}_${timestamp}_${uniqueId}_${sanitizedOriginalName}${fileExtension}`;
+
+        const filename = `${uniqueId}${fileExtension}`;
         const filepath = path.join(this.uploadPath, filename);
 
         // Save file to disk
