@@ -130,7 +130,7 @@ export class AppealsService {
 
         // Fetch the currency asynchronously
         const currency = await this.commonSetupRepository.findOne({
-          where: { name: amount.currency },
+          where: { id: amount.currency },
         });
         if (currency) {
           appealAmount.currency = currency;
@@ -230,7 +230,7 @@ export class AppealsService {
 
         // Fetch the currency asynchronously
         const currency = await this.commonSetupRepository.findOne({
-          where: { name: amount.currency },
+          where: { id: amount.currency },
         });
         if (currency) {
           appealAmount.currency = currency;

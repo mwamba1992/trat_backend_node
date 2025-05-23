@@ -3,21 +3,20 @@ import { CommonSetup } from '../../../settings/common-setup/entities/common-setu
 import { Appeal } from './appeal.entity';
 
 @Entity()
-export  class AppealAmount{
-
-  @PrimaryGeneratedColumn()// Using UUID for the 'id'
+export class AppealAmount {
+  @PrimaryGeneratedColumn() // Using UUID for the 'id'
   id: number;
 
   @Column({ type: 'float', nullable: true })
   amount: number;
 
   @Column({ type: 'float', nullable: true })
-  amountAllowed:number
+  amountAllowed: number;
 
   @ManyToOne(() => CommonSetup, (currency) => currency.id, { nullable: false })
-  currency: CommonSetup
+  currency: CommonSetup;
 
-  @ManyToOne(() => Appeal, (appeal) =>  appeal.appealAmount, {
+  @ManyToOne(() => Appeal, (appeal) => appeal.appealAmount, {
     onDelete: 'CASCADE', // Adjust based on your needs
   })
   entity: Appeal;
