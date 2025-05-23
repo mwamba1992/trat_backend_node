@@ -227,6 +227,7 @@ export class AppealsService {
     existingAppeal.respondentList = respondents;
     existingAppeal.trabAppeals = updateAppealDto.applicationss; // Update the trabAppeals
 
+    console.log('updateAppealDto.amountCurrencyList', updateAppealDto.amountCurrencyList);
     if (updateAppealDto.amountCurrencyList.length > 0) {
       existingAppeal.appealAmount = await Promise.all(
         updateAppealDto.amountCurrencyList.map(async (amountList) => {
