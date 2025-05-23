@@ -176,6 +176,7 @@ export class AppealsService {
         'appellantList',
         'respondentList',
         'appealAmount',
+        'appealAmount.currency',
       ],
       order: {
         dateOfFilling: 'DESC',
@@ -194,6 +195,7 @@ export class AppealsService {
         'appellantList',
         'respondentList',
         'appealAmount',
+        'appealAmount.currency',
       ],
     });
 
