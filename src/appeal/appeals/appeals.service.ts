@@ -227,24 +227,26 @@ export class AppealsService {
     existingAppeal.respondentList = respondents;
     existingAppeal.trabAppeals = updateAppealDto.applicationss; // Update the trabAppeals
 
-    existingAppeal.appealAmount = await Promise.all(
-      updateAppealDto.amountCurrencyList.map(async (amountList) => {
-        const amount = JSON.parse(JSON.stringify(amountList)); // Create a deep copy if needed
-        const appealAmount = new AppealAmount();
-        appealAmount.amount = amount.amount;
-        appealAmount.amountAllowed = 0;
+    if (updateAppealDto.amountCurrencyList.length > 0) {
+      existingAppeal.appealAmount = await Promise.all(
+        updateAppealDto.amountCurrencyList.map(async (amountList) => {
+          const amount = JSON.parse(JSON.stringify(amountList)); // Create a deep copy if needed
+          const appealAmount = new AppealAmount();
+          appealAmount.amount = amount.amount;
+          appealAmount.amountAllowed = 0;
 
-        // Fetch the currency asynchronously
-        const currency = await this.commonSetupRepository.findOne({
-          where: { id: amount.currency },
-        });
-        if (currency) {
-          appealAmount.currency = currency;
-        }
+          // Fetch the currency asynchronously
+          const currency = await this.commonSetupRepository.findOne({
+            where: { id: amount.currency },
+          });
+          if (currency) {
+            appealAmount.currency = currency;
+          }
 
-        return appealAmount;
-      }),
-    );
+          return appealAmount;
+        }),
+      );
+    }
 
     return this.appealRepository.save(existingAppeal);
   }
