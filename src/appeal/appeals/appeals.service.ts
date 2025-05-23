@@ -208,8 +208,6 @@ export class AppealsService {
 
   async update(id: number, updateAppealDto: CreateAppealDto): Promise<Appeal> {
     const existingAppeal = await this.findOne(id);
-
-    existingAppeal.appealAmount = [];
     await this.appealRepository.save(existingAppeal);
 
     existingAppeal.assNo = updateAppealDto.assNo;
@@ -247,6 +245,8 @@ export class AppealsService {
           return appealAmount;
         }),
       );
+    } else {
+      existingAppeal.appealAmount = [];
     }
 
     return this.appealRepository.save(existingAppeal);
