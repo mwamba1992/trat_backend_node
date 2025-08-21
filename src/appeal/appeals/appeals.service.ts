@@ -664,6 +664,9 @@ export class AppealsService {
   ): Promise<any> {
 
 
+
+    console.log('Received updateDecisionDto:', updateDecisionDto);
+
     const appeal = await this.appealRepository.findOne({
       where: { appealNo: updateDecisionDto.appealNo },
     });
