@@ -6,7 +6,7 @@ import { Appeal } from "./entities/appeal.entity";
 import { CommonSetup } from "../../settings/common-setup/entities/common-setup.entity";
 import { Notice } from "../notice/entities/notice.entity";
 import { AppealAmount } from "./entities/appeal.amount";
-import { Party } from "../../settings/parties/entities/party.entity";
+import { Party } from '../../settings/parties/entities/party.entity';
 import { generateDateRanges, isValidaPhone, processParties, TopAppellantDTO } from "../../utils/helper.utils";
 import { Bill } from "../../payment/bill/entities/bill.entity";
 import { Constants } from "../../utils/constants";
@@ -175,6 +175,7 @@ export class AppealsService {
         'respondentList',
         'appealAmount',
         'appealAmount.currency',
+        'judge',
       ],
       order: {
         dateOfFilling: 'DESC',

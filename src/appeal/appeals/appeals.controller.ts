@@ -182,7 +182,7 @@ export class AppealsController {
               }
             }
 
-            existingAppeal.progressStatus = ProgressStatus.DECIDED;;
+            existingAppeal.progressStatus = ProgressStatus.DECIDED;
             await this.appealsService.save(existingAppeal);
             console.log(`Updated appeal: ${existingAppeal.appealNo}`);
           }
