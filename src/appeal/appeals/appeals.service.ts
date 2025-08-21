@@ -1,37 +1,35 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Between, Not, Repository } from 'typeorm';
-import { CreateAppealDto } from './dto/create-appeal.dto';
-import { Appeal } from './entities/appeal.entity';
-import { CommonSetup } from '../../settings/common-setup/entities/common-setup.entity';
-import { Notice } from '../notice/entities/notice.entity';
-import { AppealAmount } from './entities/appeal.amount';
-import { Party } from '../../settings/parties/entities/party.entity';
-import {
-  generateDateRanges,
-  isValidaPhone,
-  processParties,
-  TopAppellantDTO,
-} from '../../utils/helper.utils';
-import { Bill } from '../../payment/bill/entities/bill.entity';
-import { Constants } from '../../utils/constants';
-import { v4 as uuidv4 } from 'uuid';
-import { User } from '../../auth/user/entities/user.entity';
-import { createBillItem, sendBill } from '../../utils/middle.gepg';
-import { BillItem } from '../../payment/bill-item/entities/bill-item.entity';
-import { ApplicationRegister } from '../application-register/entities/application-register.entity';
-import { ProgressStatus } from './dto/appeal.status.enum';
-import { Cron } from '@nestjs/schedule';
-import { YearlyCases } from './entities/yearly.case';
-import { AppealFilterDto } from './dto/appeal.filter.dto';
-import { Fee } from '../../settings/fees/entities/fee.entity';
-import { UserContextService } from '../../auth/user/dto/user.context';
-import * as path from 'node:path';
-import * as fs from 'node:fs';
+import { Injectable, Logger, NotFoundException } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Between, Not, Repository } from "typeorm";
+import { CreateAppealDto } from "./dto/create-appeal.dto";
+import { Appeal } from "./entities/appeal.entity";
+import { CommonSetup } from "../../settings/common-setup/entities/common-setup.entity";
+import { Notice } from "../notice/entities/notice.entity";
+import { AppealAmount } from "./entities/appeal.amount";
+import { Party } from "../../settings/parties/entities/party.entity";
+import { generateDateRanges, isValidaPhone, processParties, TopAppellantDTO } from "../../utils/helper.utils";
+import { Bill } from "../../payment/bill/entities/bill.entity";
+import { Constants } from "../../utils/constants";
+import { v4 as uuidv4 } from "uuid";
+import { User } from "../../auth/user/entities/user.entity";
+import { createBillItem, sendBill } from "../../utils/middle.gepg";
+import { BillItem } from "../../payment/bill-item/entities/bill-item.entity";
+import { ApplicationRegister } from "../application-register/entities/application-register.entity";
+import { ProgressStatus } from "./dto/appeal.status.enum";
+import { Cron } from "@nestjs/schedule";
+import { YearlyCases } from "./entities/yearly.case";
+import { AppealFilterDto } from "./dto/appeal.filter.dto";
+import { Fee } from "../../settings/fees/entities/fee.entity";
+import { UserContextService } from "../../auth/user/dto/user.context";
+import * as path from "node:path";
+import * as fs from "node:fs";
+import { Judge } from "../../settings/judges/entities/judge.entity";
 
 @Injectable()
 export class AppealsService {
   constructor(
+    @InjectRepository(Judge)
+    private readonly judgeRepository: Repository<Judge>,
     @InjectRepository(Appeal)
     private readonly appealRepository: Repository<Appeal>,
     @InjectRepository(CommonSetup)
@@ -691,6 +689,13 @@ export class AppealsService {
 
     if (updateDecisionDto.status) {
       appeal.statusTrend = updateDecisionDto.status;
+    }
+
+
+    if (updateDecisionDto.judge) {
+      appeal.judge = await this.judgeRepository.findOne({
+        where: { id: updateDecisionDto.judge },
+      });
     }
 
     appeal.progressStatus = ProgressStatus.DECIDED;

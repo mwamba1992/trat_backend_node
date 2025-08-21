@@ -1,18 +1,10 @@
 import { BaseEntity } from '../../../utils/base.entity';
 
-
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  OneToOne,
-  JoinColumn, ManyToOne,
-} from 'typeorm';
+import { Entity, Column, JoinColumn, ManyToOne } from 'typeorm';
 import { Bill } from '../../../payment/bill/entities/bill.entity';
 
 @Entity()
-export class Notice extends BaseEntity{
-
+export class Notice extends BaseEntity {
   @Column({ type: 'varchar', length: 255 })
   noticeNo: string;
 
@@ -47,4 +39,3 @@ export class Notice extends BaseEntity{
   @Column({ type: 'varchar', length: 50, nullable: true })
   noticeType: string;
 }
-

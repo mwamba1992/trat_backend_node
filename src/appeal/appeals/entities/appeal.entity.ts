@@ -18,6 +18,7 @@ import { AppealAmount } from './appeal.amount';
 import { ProgressStatus } from '../dto/appeal.status.enum';
 import { Summons } from './summons.entity';
 import { NoticeHighCourt } from '../../notice/entities/notice.high.court';
+import { Judge } from "../../../settings/judges/entities/judge.entity";
 
 @Entity()
 export class Appeal extends BaseEntity {
@@ -127,5 +128,7 @@ export class Appeal extends BaseEntity {
     const day = parseInt(dateParts[0], 10);
     this.dateOfFilling = new Date(year, month, day); // Creates the Date object
   }
-}
 
+  @ManyToOne(() => Judge, (judge) => judge.id)
+  judge: Judge;
+}

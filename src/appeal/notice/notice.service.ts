@@ -8,7 +8,6 @@ import { BillItem } from '../../payment/bill-item/entities/bill-item.entity';
 import { createBillItem, sendBill } from '../../utils/middle.gepg';
 import { User } from '../../auth/user/entities/user.entity';
 import { v4 as uuidv4 } from 'uuid';
-import { raw } from 'express';
 import { Fee } from '../../settings/fees/entities/fee.entity';
 import { CreateNoticeHigh } from './dto/create-notice-high';
 import { NoticeHighCourt } from './entities/notice.high.court';
@@ -16,7 +15,6 @@ import { Appeal } from '../appeals/entities/appeal.entity';
 
 @Injectable()
 export class NoticeService {
-
   constructor(
     @InjectRepository(Notice)
     private readonly noticeRepository: Repository<Notice>,
@@ -249,7 +247,7 @@ export class NoticeService {
       bill.billEquivalentAmount = fee.amount;
       bill.miscellaneousAmount = 0;
       bill.payerPhone = noticeHigh.appellantPhone;
-      bill.payerName = noticeHigh.appellantName
+      bill.payerName = noticeHigh.appellantName;
       bill.payerEmail = 'trat@register.go.tz';
       bill.billPayType = '1';
 

@@ -1,16 +1,30 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, DeleteDateColumn } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+  DeleteDateColumn,
+} from 'typeorm';
 import { IsBoolean, IsOptional, IsString } from 'class-validator';
 
 @Entity()
 export class BaseEntity {
-
-  @PrimaryGeneratedColumn()// Using UUID for the 'id'
+  @PrimaryGeneratedColumn() // Using UUID for the 'id'
   id: number;
 
-  @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', name: 'created_at' })
+  @CreateDateColumn({
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP',
+    name: 'created_at',
+  })
   createdAt: Date = new Date(); // Equivalent to LocalDateTime.now()
 
-  @UpdateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', name: 'updated_at' })
+  @UpdateDateColumn({
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP',
+    name: 'updated_at',
+  })
   updatedAt: Date = new Date(); // Equivalent to LocalDateTime.now()
 
   @DeleteDateColumn({ type: 'timestamp', nullable: true, name: 'deleted_at' })
