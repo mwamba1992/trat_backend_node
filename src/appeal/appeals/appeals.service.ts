@@ -692,9 +692,10 @@ export class AppealsService {
     }
 
     if (updateDecisionDto.status) {
-      appeal.statusTrend = updateDecisionDto.status;
+      appeal.statusTrend = await this.commonSetupRepository.findOne({
+        where: { id: updateDecisionDto.status },
+      });
     }
-
 
     if (updateDecisionDto.judge) {
       appeal.judge = await this.judgeRepository.findOne({
