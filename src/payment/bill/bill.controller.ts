@@ -26,8 +26,7 @@ export class BillController {
     return this.billService.create(createBillDto);
   }
 
-
-  @Post("/receive-bill")
+  @Post('/receive-bill')
   receiveBill(@Body() receiveBillDto: string) {
     return this.billService.receiveBill(receiveBillDto);
   }
@@ -52,25 +51,22 @@ export class BillController {
     return this.billService.remove(+id);
   }
 
-
-  @Post("/import")
+  @Post('/import')
   importBill() {
     console.log('Importing bills from CSV file');
 
-    const csv = require('csv-parser')
-    const fs = require('fs')
+    const csv = require('csv-parser');
+    const fs = require('fs');
     const results = [];
 
     fs.createReadStream('/Users/amtz/gepg/new_gepg/nest/bill_edited.csv')
       .pipe(csv())
       .on('data', async (row) => {
-
-
         // Map CSV rows to Bill entity
         const bill = new Bill();
         bill.billId = row['billId'];
         bill.appType = row['appType'];
-        bill.createdByUser = row['createdBy'];  // Ensure user is resolved if needed
+        bill.createdByUser = row['createdBy']; // Ensure user is resolved if needed
         bill.billDescription = row['billDescription'];
         bill.billedAmount = parseFloat(row['billedAmount']);
         bill.billReference = row['reference'];
@@ -79,8 +75,7 @@ export class BillController {
         bill.currency = row['currency'];
         bill.miscellaneousAmount = parseFloat(row['miscAmount']);
 
-
-        bill.expiryDate = new Date(formatDate(row['expiryDate']))
+        bill.expiryDate = new Date(formatDate(row['expiryDate']));
         bill.generatedDate = new Date(formatDate(row['createdDate']));
         bill.payerEmail = row['email'];
         bill.payerName = row['payerName'];
@@ -90,20 +85,21 @@ export class BillController {
 
         console.log(bill);
 
-        if(await this.billService.findBillByControlNUmber(bill.billControlNumber) === null)
-          {
-            await this.billService.saveBill(bill);
-          }
-
+        if (
+          (await this.billService.findBillByControlNUmber(
+            bill.billControlNumber,
+          )) === null
+        ) {
+          await this.billService.saveBill(bill);
+        }
       })
-      .on('end', () => {
-
-      });
+      .on('end', () => {});
   }
 
   @Post('/resend-bill')
-  resendBill(@Body() resendBillDto: string) {
+  resendBill(@Body() resendBillDto: any) {
     console.log('####### inside resend bill #########');
-    return this.billService.resendBill(resendBillDto);
+    console.log(resendBillDto);
+    return this.billService.resendBill(resendBillDto.data);
   }
 }
