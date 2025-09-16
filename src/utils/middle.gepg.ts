@@ -12,6 +12,8 @@ export async function sendBill(
   bill: Bill,
   billItemRepository: Repository<BillItem>,
 ): Promise<boolean> {
+
+  console.log(bill.id);
   const billets: BillItem[] = await billItemRepository.find({
     where: { bill: bill },
   });
