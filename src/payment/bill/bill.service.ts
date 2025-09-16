@@ -164,7 +164,7 @@ export class BillService {
   async resendBill(billId: string) {
     console.log(billId);
     await sendBill(
-      await this.findByBillId('c3ec02a6'),
+      await this.findByBillId('32bbed03'),
       this.billItemRepository,
     );
   }
