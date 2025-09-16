@@ -103,6 +103,7 @@ export class BillController {
 
   @Post('/resend-bill')
   resendBill(@Body() resendBillDto: string) {
+    console.log('####### inside resend bill #########');
     return this.billService.resendBill(resendBillDto);
   }
 }
