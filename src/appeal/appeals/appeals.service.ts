@@ -688,8 +688,14 @@ export class AppealsService {
     }
 
     if (updateDecisionDto.dateOfDecision) {
-      appeal.dateOfDecision = new Date(updateDecisionDto.dateOfDecision);
+      const [year, month, day] = updateDecisionDto.dateOfDecision.split("-");
+      appeal.dateOfDecision = new Date(
+        Number(year),
+        Number(month) - 1, // months are 0-based
+        Number(day)
+      );
     }
+
 
     if (updateDecisionDto.status) {
       appeal.statusTrend = await this.commonSetupRepository.findOne({
