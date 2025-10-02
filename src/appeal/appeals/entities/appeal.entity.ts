@@ -121,6 +121,9 @@ export class Appeal extends BaseEntity {
   @Column({ type: 'text', array: true, nullable: true })
   decisionFiles: string[];
 
+  @CreateDateColumn({ type: 'date', nullable: true })
+  receivedDate: Date;
+
   setDateFromString(dateString: string): void {
     const dateParts = dateString.split('/'); // Split 'DD/MM/YYYY'
     const year = parseInt(dateParts[2], 10);

@@ -1,29 +1,34 @@
-import { Injectable, Logger, NotFoundException } from "@nestjs/common";
-import { InjectRepository } from "@nestjs/typeorm";
-import { Between, Not, Repository } from "typeorm";
-import { CreateAppealDto } from "./dto/create-appeal.dto";
-import { Appeal } from "./entities/appeal.entity";
-import { CommonSetup } from "../../settings/common-setup/entities/common-setup.entity";
-import { Notice } from "../notice/entities/notice.entity";
-import { AppealAmount } from "./entities/appeal.amount";
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Between, Not, Repository } from 'typeorm';
+import { CreateAppealDto } from './dto/create-appeal.dto';
+import { Appeal } from './entities/appeal.entity';
+import { CommonSetup } from '../../settings/common-setup/entities/common-setup.entity';
+import { Notice } from '../notice/entities/notice.entity';
+import { AppealAmount } from './entities/appeal.amount';
 import { Party } from '../../settings/parties/entities/party.entity';
-import { generateDateRanges, isValidaPhone, processParties, TopAppellantDTO } from "../../utils/helper.utils";
-import { Bill } from "../../payment/bill/entities/bill.entity";
-import { Constants } from "../../utils/constants";
-import { v4 as uuidv4 } from "uuid";
-import { User } from "../../auth/user/entities/user.entity";
-import { createBillItem, sendBill } from "../../utils/middle.gepg";
-import { BillItem } from "../../payment/bill-item/entities/bill-item.entity";
-import { ApplicationRegister } from "../application-register/entities/application-register.entity";
-import { ProgressStatus } from "./dto/appeal.status.enum";
-import { Cron } from "@nestjs/schedule";
-import { YearlyCases } from "./entities/yearly.case";
-import { AppealFilterDto } from "./dto/appeal.filter.dto";
-import { Fee } from "../../settings/fees/entities/fee.entity";
-import { UserContextService } from "../../auth/user/dto/user.context";
-import * as path from "node:path";
-import * as fs from "node:fs";
-import { Judge } from "../../settings/judges/entities/judge.entity";
+import {
+  generateDateRanges,
+  isValidaPhone,
+  processParties,
+  TopAppellantDTO,
+} from '../../utils/helper.utils';
+import { Bill } from '../../payment/bill/entities/bill.entity';
+import { Constants } from '../../utils/constants';
+import { v4 as uuidv4 } from 'uuid';
+import { User } from '../../auth/user/entities/user.entity';
+import { createBillItem, sendBill } from '../../utils/middle.gepg';
+import { BillItem } from '../../payment/bill-item/entities/bill-item.entity';
+import { ApplicationRegister } from '../application-register/entities/application-register.entity';
+import { ProgressStatus } from './dto/appeal.status.enum';
+import { Cron } from '@nestjs/schedule';
+import { YearlyCases } from './entities/yearly.case';
+import { AppealFilterDto } from './dto/appeal.filter.dto';
+import { Fee } from '../../settings/fees/entities/fee.entity';
+import { UserContextService } from '../../auth/user/dto/user.context';
+import * as path from 'node:path';
+import * as fs from 'node:fs';
+import { Judge } from '../../settings/judges/entities/judge.entity';
 
 @Injectable()
 export class AppealsService {
@@ -224,7 +229,10 @@ export class AppealsService {
     existingAppeal.respondentList = respondents;
     existingAppeal.trabAppeals = updateAppealDto.applicationss; // Update the trabAppeals
 
-    console.log('updateAppealDto.amountCurrencyList', updateAppealDto.amountCurrencyList);
+    console.log(
+      'updateAppealDto.amountCurrencyList',
+      updateAppealDto.amountCurrencyList,
+    );
     if (updateAppealDto.amountCurrencyList.length > 0) {
       existingAppeal.appealAmount = await Promise.all(
         updateAppealDto.amountCurrencyList.map(async (amountList) => {
@@ -662,9 +670,6 @@ export class AppealsService {
     updateDecisionDto: any,
     files?: Express.Multer.File[],
   ): Promise<any> {
-
-
-
     console.log('Received updateDecisionDto:', updateDecisionDto);
 
     const appeal = await this.appealRepository.findOne({
@@ -688,14 +693,22 @@ export class AppealsService {
     }
 
     if (updateDecisionDto.dateOfDecision) {
-      const [year, month, day] = updateDecisionDto.dateOfDecision.split("-");
+      const [year, month, day] = updateDecisionDto.dateOfDecision.split('-');
       appeal.dateOfDecision = new Date(
         Number(year),
         Number(month) - 1, // months are 0-based
-        Number(day)
+        Number(day),
       );
     }
 
+    if (updateDecisionDto.receivedDate) {
+      const [year, month, day] = updateDecisionDto.receivedDate.split('-');
+      appeal.receivedDate = new Date(
+        Number(year),
+        Number(month) - 1, // months are 0-based
+        Number(day),
+      );
+    }
 
     if (updateDecisionDto.status) {
       appeal.statusTrend = await this.commonSetupRepository.findOne({
@@ -723,7 +736,6 @@ export class AppealsService {
         // Generate unique filename with timestamp and UUID
         const uniqueId = uuidv4().split('-')[0];
         const fileExtension = path.extname(file.originalname);
-
 
         const filename = `${uniqueId}${fileExtension}`;
         const filepath = path.join(this.uploadPath, filename);
