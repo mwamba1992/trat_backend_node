@@ -20,6 +20,7 @@ import { Appeal } from './appeal/appeals/entities/appeal.entity';
 import { AppealAmount } from './appeal/appeals/entities/appeal.amount';
 import { Fee } from './settings/fees/entities/fee.entity';
 import { BillModule } from './payment/bill/bill.module';
+import { ReportModule } from './report/report.module';
 import { Payment } from './payment/payment/entities/payment.entity';
 import { YearlyCases } from './appeal/appeals/entities/yearly.case';
 import { ScheduleModule } from '@nestjs/schedule';
@@ -63,6 +64,7 @@ import { NoticeHighCourt } from './appeal/notice/entities/notice.high.court';
     PaymentModule,
     SettingsModule,
     BillModule,
+    ReportModule,
   ],
   controllers: [AppController],
   providers: [AppService],
